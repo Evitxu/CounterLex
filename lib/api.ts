@@ -61,3 +61,28 @@ export function counterfactual(
 export function getEvaluation(): Promise<Evaluation> {
   return fetch(`${API_BASE}/model/evaluation`).then(json<Evaluation>);
 }
+
+export async function downloadReport(
+  factors: Factors,
+  overrides: Factors,
+  lang: string
+): Promise<void> {
+  const res = await fetch(`${API_BASE}/report`, {
+    method: "POST",
+    headers: jsonHeaders,
+    body: JSON.stringify({ factors, overrides, lang }),
+  });
+  if (!res.ok) {
+    const b = await res.text().catch(() => "");
+    throw new Error(`API ${res.status}: ${b || res.statusText}`);
+  }
+  const blob = await res.blob();
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "counterlex-report.pdf";
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+}

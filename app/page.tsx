@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { analyze, counterfactual, listFactors } from "@/lib/api";
+import { analyze, counterfactual, downloadReport, listFactors } from "@/lib/api";
 import { useI18n } from "@/lib/i18n";
 import type {
   CounterfactualResult,
@@ -147,6 +147,35 @@ export default function Home() {
     setCf(null);
   }
 
+  // Persist the current case so the Reports module can pick it up.
+  useEffect(() => {
+    if (catalog.length === 0) return;
+    try {
+      localStorage.setItem(
+        "counterlex_last_case",
+        JSON.stringify({ factors: baseFactors, scenario: scenarioFactors })
+      );
+    } catch {
+      /* ignore */
+    }
+  }, [baseFactors, scenarioFactors, catalog.length]);
+
+  const [reporting, setReporting] = useState(false);
+  async function downloadPdf() {
+    const overrides: Factors = {};
+    for (const k of Object.keys(scenarioFactors)) {
+      if (!!scenarioFactors[k] !== !!baseFactors[k]) overrides[k] = !!scenarioFactors[k];
+    }
+    setReporting(true);
+    try {
+      await downloadReport(baseFactors, overrides, lang);
+    } catch (e) {
+      setErr((e as Error).message);
+    } finally {
+      setReporting(false);
+    }
+  }
+
   async function setAsBaseline() {
     setBusy(true);
     try {
@@ -235,6 +264,9 @@ export default function Home() {
                 </button>
                 <button className="btn btn-secondary" type="button" onClick={setAsBaseline} disabled={busy || changedCount === 0} title={t("setBaselineTitle")}>
                   {t("setBaseline")}
+                </button>
+                <button className="btn btn-secondary" type="button" onClick={downloadPdf} disabled={reporting}>
+                  📑 {reporting ? t("generating") : t("downloadReport")}
                 </button>
               </div>
             </div>

@@ -15,7 +15,7 @@ const ITEMS: Item[] = [
   { href: "/", icon: "⚖", key: "nav.counterfactual" },
   { href: "/analyze", icon: "📄", key: "nav.analyze" },
   { href: "/search", icon: "🔍", key: "nav.search" },
-  { href: "/reports", icon: "📑", key: "nav.reports", soon: true },
+  { href: "/reports", icon: "📑", key: "nav.reports" },
 ];
 
 export default function Sidebar() {
