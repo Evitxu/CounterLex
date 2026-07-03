@@ -182,6 +182,7 @@ export default function Home() {
               value={caseText}
               onChange={(e) => setCaseText(e.target.value)}
               rows={5}
+              maxLength={5000}
               placeholder={t("casePlaceholder")}
               style={{ width: "100%", resize: "vertical", marginTop: 6, padding: 8 }}
             />

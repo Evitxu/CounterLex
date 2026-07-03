@@ -42,6 +42,16 @@ export default function EvaluationPanel({
                   brier: String(data.training_metrics.brier_score),
                 })}
               </p>
+              {data.training_metrics.test_accuracy !== undefined && (
+                <p style={{ fontSize: 13, color: "#14161c", fontWeight: 600 }}>
+                  {t("evalHoldout", {
+                    n: String(data.training_metrics.n_test ?? ""),
+                    acc: String(data.training_metrics.test_accuracy),
+                    auc: String(data.training_metrics.test_auc ?? "—"),
+                    brier: String(data.training_metrics.test_brier),
+                  })}
+                </p>
+              )}
               <div className="cl-scroll-x">
                 <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13, minWidth: 360 }}>
                   <thead>
