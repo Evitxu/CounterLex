@@ -98,7 +98,7 @@ class TrainModelHandler:
         cases = self._repo.all_cases()
         if not cases:
             raise ValueError("Corpus is empty — generate it before training.")
-        model, metrics = OutcomeModel.train(cases)
+        model, metrics = OutcomeModel.train(cases, seed=get_settings().synthetic_seed)
         self._repo.save_model(
             model.coef, model.intercept, metrics, datetime.now(timezone.utc).isoformat()
         )

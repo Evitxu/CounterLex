@@ -3,9 +3,11 @@
 from __future__ import annotations
 
 from fastapi import APIRouter, Depends, HTTPException
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 
 from app.application.buses import CommandBus, QueryBus
+from app.core.config import get_settings
+from app.core.sanitize import sanitize_text
 from app.application.commands import GenerateCorpusCommand, TrainModelCommand
 from app.application.queries import (
     AnalyzeCaseQuery,
@@ -57,7 +59,15 @@ async def evaluation(bus: QueryBus = Depends(get_query_bus)):
 
 # ---- analyze a case ----
 class AnalyzeBody(BaseModel):
-    text: str = Field(min_length=10)
+    text: str
+
+    @field_validator("text")
+    @classmethod
+    def _clean(cls, v: str) -> str:
+        cleaned = sanitize_text(v)
+        if len(cleaned) < 10:
+            raise ValueError("Case description is too short.")
+        return cleaned[: get_settings().max_case_chars]
 
 
 @router.post("/analyze", response_model=CaseAnalysis)

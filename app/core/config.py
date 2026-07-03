@@ -26,6 +26,9 @@ class Settings(BaseSettings):
     # Retrieval
     top_k_precedents: int = Field(default=6, ge=1, le=50)
 
+    # Max length of a user-submitted case description (XSS/DoS guard).
+    max_case_chars: int = Field(default=5000, ge=10)
+
     frontend_origin: str = "http://localhost:3000"
 
     # Auto-generate + train on startup if the corpus is empty (nice for demos).
