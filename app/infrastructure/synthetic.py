@@ -30,12 +30,20 @@ def true_probability(factors: dict[str, bool]) -> float:
     return _sigmoid(logit)
 
 
+# Spanish court abbreviations, for realistic-looking synthetic references.
+_COURTS = ["STS", "SAP", "STSJ", "SAN"]
+
+
 def generate_corpus(size: int, seed: int) -> list[Case]:
     rng = np.random.RandomState(seed)
     cases: list[Case] = []
-    for _ in range(size):
+    for i in range(size):
         factors = {k: bool(rng.rand() < BASE_RATES[k]) for k in FACTOR_KEYS}
         p = true_probability(factors)
         convicted = bool(rng.rand() < p)
-        cases.append(Case(factors=factors, convicted=convicted, is_real=False))
+        court = _COURTS[i % len(_COURTS)]
+        reference = f"{court} {100 + i}/{2018 + (i % 7)}"
+        cases.append(
+            Case(factors=factors, convicted=convicted, is_real=False, reference=reference)
+        )
     return cases

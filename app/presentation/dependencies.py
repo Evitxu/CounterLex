@@ -20,6 +20,8 @@ from app.application.queries import (
     EvaluationQuery,
     ListFactorsHandler,
     ListFactorsQuery,
+    SearchJurisprudenceHandler,
+    SearchJurisprudenceQuery,
 )
 from app.core.config import get_settings
 from app.infrastructure.factor_extractor import FactorExtractor
@@ -52,6 +54,7 @@ def get_query_bus() -> QueryBus:
     repo = get_repo()
     bus.register(ListFactorsQuery, ListFactorsHandler())
     bus.register(AnalyzeCaseQuery, AnalyzeCaseHandler(repo, _extractor()))
+    bus.register(SearchJurisprudenceQuery, SearchJurisprudenceHandler(repo, _extractor()))
     bus.register(CounterfactualQuery, CounterfactualHandler(repo))
     bus.register(EvaluationQuery, EvaluationHandler(repo))
     return bus

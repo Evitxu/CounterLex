@@ -15,8 +15,9 @@ from app.application.queries import (
     CounterfactualQuery,
     EvaluationQuery,
     ListFactorsQuery,
+    SearchJurisprudenceQuery,
 )
-from app.domain.entities import CaseAnalysis, CounterfactualResult
+from app.domain.entities import CaseAnalysis, CounterfactualResult, JurisprudenceSearch
 from app.presentation.dependencies import get_command_bus, get_query_bus
 
 router = APIRouter(prefix="/api/v1")
@@ -110,6 +111,27 @@ async def analyze_pdf(
 
     result = await bus.ask(AnalyzeCaseQuery(text=text))
     assert isinstance(result, CaseAnalysis)
+    return result
+
+
+# ---- jurisprudence search ----
+class SearchBody(BaseModel):
+    text: str
+    top_k: int = Field(default=10, ge=1, le=50)
+
+    @field_validator("text")
+    @classmethod
+    def _clean(cls, v: str) -> str:
+        cleaned = sanitize_text(v)
+        if len(cleaned) < 3:
+            raise ValueError("Search query is too short.")
+        return cleaned[: get_settings().max_case_chars]
+
+
+@router.post("/search", response_model=JurisprudenceSearch)
+async def search(body: SearchBody, bus: QueryBus = Depends(get_query_bus)) -> JurisprudenceSearch:
+    result = await bus.ask(SearchJurisprudenceQuery(text=body.text, top_k=body.top_k))
+    assert isinstance(result, JurisprudenceSearch)
     return result
 
 

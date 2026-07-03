@@ -48,6 +48,12 @@ class CaseAnalysis(BaseModel):
     extraction_source: str = "llm"  # "llm" or "keyword" (fallback)
 
 
+class JurisprudenceSearch(BaseModel):
+    query_factors: dict[str, bool]
+    extraction_source: str  # "llm" or "keyword"
+    results: list[PrecedentRef]
+
+
 class CounterfactualResult(BaseModel):
     base: OutcomePrediction
     counterfactual: OutcomePrediction

@@ -8,6 +8,7 @@ from app.domain.entities import (
     CaseAnalysis,
     CounterfactualResult,
     FactorContribution,
+    JurisprudenceSearch,
     OutcomePrediction,
 )
 from app.domain.factors import FACTORS, GROUND_TRUTH
@@ -81,6 +82,25 @@ class AnalyzeCaseHandler:
         )
         return CaseAnalysis(
             factors=factors, prediction=prediction, precedents=precedents, extraction_source=source
+        )
+
+
+# --- semantic (factor-based) jurisprudence search ------------------------
+class SearchJurisprudenceQuery(BaseModel):
+    text: str
+    top_k: int = 10
+
+
+class SearchJurisprudenceHandler:
+    def __init__(self, repo: CorpusRepository, extractor: FactorExtractor) -> None:
+        self._repo = repo
+        self._extractor = extractor
+
+    async def __call__(self, q: SearchJurisprudenceQuery) -> JurisprudenceSearch:
+        factors, source = await self._extractor.extract(q.text)
+        results = PrecedentIndex(self._repo.all_cases()).query(factors, q.top_k)
+        return JurisprudenceSearch(
+            query_factors=factors, extraction_source=source, results=results
         )
 
 
