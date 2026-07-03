@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { listFactors, searchJurisprudence } from "@/lib/api";
 import { useI18n } from "@/lib/i18n";
+import { useBusy } from "@/lib/busy";
 import type { Factor, JurisprudenceSearch } from "@/lib/types";
 import PrecedentList from "@/components/PrecedentList";
 
@@ -16,6 +17,7 @@ const card: React.CSSProperties = {
 
 export default function SearchPage() {
   const { t, lang } = useI18n();
+  const { run: track } = useBusy();
   const [catalog, setCatalog] = useState<Factor[]>([]);
   const [q, setQ] = useState("");
   const [busy, setBusy] = useState(false);
@@ -23,7 +25,8 @@ export default function SearchPage() {
   const [data, setData] = useState<JurisprudenceSearch | null>(null);
 
   useEffect(() => {
-    listFactors().then(setCatalog).catch((e) => setErr((e as Error).message));
+    track(listFactors()).then(setCatalog).catch((e) => setErr((e as Error).message));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const byKey = useMemo(() => Object.fromEntries(catalog.map((f) => [f.key, f])), [catalog]);
@@ -41,7 +44,7 @@ export default function SearchPage() {
     setBusy(true);
     setErr(null);
     try {
-      setData(await searchJurisprudence(q));
+      setData(await track(searchJurisprudence(q)));
     } catch (e2) {
       setErr((e2 as Error).message);
     } finally {

@@ -125,6 +125,20 @@ textarea:focus, input:focus {
   cursor: pointer;
 }
 
+/* ---- Busy spinner ---- */
+.cl-spinner {
+  width: 22px;
+  height: 22px;
+  border: 3px solid #d2d7e0;
+  border-top-color: #3050b0;
+  border-radius: 50%;
+  animation: cl-spin 0.8s linear infinite;
+  display: inline-block;
+}
+@keyframes cl-spin {
+  to { transform: rotate(360deg); }
+}
+
 /* ---- Sensitivity waterfall ---- */
 .cl-wf-row { display: flex; align-items: center; gap: 10px; padding: 4px 0; }
 .cl-wf-bar-track { position: relative; flex: 1; height: 14px; background: #eceef3; border-radius: 7px; min-width: 60px; }

@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { analyze, counterfactual, downloadReport, listFactors } from "@/lib/api";
 import { useI18n } from "@/lib/i18n";
+import { useBusy } from "@/lib/busy";
 import type {
   CounterfactualResult,
   Factor,
@@ -28,6 +29,7 @@ const card: React.CSSProperties = {
 
 export default function Home() {
   const { t, lang } = useI18n();
+  const { run } = useBusy();
   const [catalog, setCatalog] = useState<Factor[]>([]);
   const [caseText, setCaseText] = useState("");
   const [baseFactors, setBaseFactors] = useState<Factors>({});
@@ -83,14 +85,14 @@ export default function Home() {
 
     (async () => {
       try {
-        const cat = await listFactors();
+        const cat = await run(listFactors());
         setCatalog(cat);
         const base: Factors = Object.fromEntries(
           cat.map((f) => [f.key, prefill ? !!prefill[f.key] : false])
         );
         setBaseFactors(base);
         setScenarioFactors(base);
-        const res = await counterfactual(base, {});
+        const res = await run(counterfactual(base, {}));
         setBaseline(res.base);
       } catch (e) {
         setErr((e as Error).message);
@@ -108,7 +110,7 @@ export default function Home() {
       return;
     }
     try {
-      const res = await counterfactual(base, diff);
+      const res = await run(counterfactual(base, diff));
       setCf(res);
       setBaseline(res.base);
     } catch (e) {
@@ -168,7 +170,7 @@ export default function Home() {
     }
     setReporting(true);
     try {
-      await downloadReport(baseFactors, overrides, lang);
+      await run(downloadReport(baseFactors, overrides, lang));
     } catch (e) {
       setErr((e as Error).message);
     } finally {
@@ -179,7 +181,7 @@ export default function Home() {
   async function setAsBaseline() {
     setBusy(true);
     try {
-      const res = await counterfactual(scenarioFactors, {});
+      const res = await run(counterfactual(scenarioFactors, {}));
       setBaseFactors({ ...scenarioFactors });
       setBaseline(res.base);
       setCf(null);

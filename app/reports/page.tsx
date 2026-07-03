@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { downloadReport, listFactors } from "@/lib/api";
 import { useI18n } from "@/lib/i18n";
+import { useBusy } from "@/lib/busy";
 import type { Factor, Factors } from "@/lib/types";
 
 const card: React.CSSProperties = {
@@ -21,13 +22,14 @@ interface LastCase {
 
 export default function ReportsPage() {
   const { t, lang } = useI18n();
+  const { run } = useBusy();
   const [catalog, setCatalog] = useState<Factor[]>([]);
   const [last, setLast] = useState<LastCase | null>(null);
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
 
   useEffect(() => {
-    listFactors().then(setCatalog).catch((e) => setErr((e as Error).message));
+    run(listFactors()).then(setCatalog).catch((e) => setErr((e as Error).message));
     try {
       const raw = localStorage.getItem("counterlex_last_case");
       if (raw) setLast(JSON.parse(raw) as LastCase);
@@ -57,7 +59,7 @@ export default function ReportsPage() {
     setBusy(true);
     setErr(null);
     try {
-      await downloadReport(last.factors, overrides, lang);
+      await run(downloadReport(last.factors, overrides, lang));
     } catch (e) {
       setErr((e as Error).message);
     } finally {

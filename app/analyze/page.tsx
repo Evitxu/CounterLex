@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { analyze, analyzePdf, listFactors } from "@/lib/api";
 import { useI18n } from "@/lib/i18n";
+import { useBusy } from "@/lib/busy";
 import { presentFactorEffects, reconstructModel } from "@/lib/model";
 import type { CaseAnalysis, Factor } from "@/lib/types";
 import ProbabilityGauge from "@/components/ProbabilityGauge";
@@ -19,6 +20,7 @@ const card: React.CSSProperties = {
 
 export default function AnalyzePage() {
   const { t, lang } = useI18n();
+  const { run: track } = useBusy();
   const router = useRouter();
   const [catalog, setCatalog] = useState<Factor[]>([]);
   const [text, setText] = useState("");
@@ -31,7 +33,8 @@ export default function AnalyzePage() {
   const MAX_PDF = 20 * 1024 * 1024;
 
   useEffect(() => {
-    listFactors().then(setCatalog).catch((e) => setErr((e as Error).message));
+    track(listFactors()).then(setCatalog).catch((e) => setErr((e as Error).message));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const byKey = useMemo(() => Object.fromEntries(catalog.map((f) => [f.key, f])), [catalog]);
@@ -48,7 +51,7 @@ export default function AnalyzePage() {
     setBusy(true);
     setErr(null);
     try {
-      setAnalysis(await analyze(text));
+      setAnalysis(await track(analyze(text)));
     } catch (e) {
       setErr((e as Error).message);
     } finally {
@@ -68,7 +71,7 @@ export default function AnalyzePage() {
     setErr(null);
     setPdfName(file.name);
     try {
-      setAnalysis(await analyzePdf(file));
+      setAnalysis(await track(analyzePdf(file)));
     } catch (e2) {
       setErr((e2 as Error).message);
     } finally {
