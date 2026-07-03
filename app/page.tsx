@@ -15,6 +15,8 @@ import FactorToggles from "@/components/FactorToggles";
 import ContributionBars from "@/components/ContributionBars";
 import PrecedentList from "@/components/PrecedentList";
 import EvaluationPanel from "@/components/EvaluationPanel";
+import SensitivityWaterfall from "@/components/SensitivityWaterfall";
+import { reconstructModel } from "@/lib/model";
 
 const card: React.CSSProperties = {
   background: "#fff",
@@ -64,7 +66,18 @@ export default function Home() {
       try {
         const cat = await listFactors();
         setCatalog(cat);
-        const base: Factors = Object.fromEntries(cat.map((f) => [f.key, false]));
+        let base: Factors = Object.fromEntries(cat.map((f) => [f.key, false]));
+        // If arriving from the Analyze Judgment module, preload its factors.
+        try {
+          const raw = sessionStorage.getItem("counterlex_prefill");
+          if (raw) {
+            const pf = JSON.parse(raw) as Factors;
+            base = Object.fromEntries(cat.map((f) => [f.key, !!pf[f.key]]));
+            sessionStorage.removeItem("counterlex_prefill");
+          }
+        } catch {
+          /* ignore */
+        }
         setBaseFactors(base);
         setScenarioFactors(base);
         const res = await counterfactual(base, {});
@@ -137,6 +150,8 @@ export default function Home() {
       setBusy(false);
     }
   }
+
+  const linModel = useMemo(() => (baseline ? reconstructModel(baseline) : null), [baseline]);
 
   const scenarioProb = cf ? cf.counterfactual.probability : baseline?.probability ?? 0;
   const baselineProb = baseline?.probability ?? null;
@@ -233,6 +248,17 @@ export default function Home() {
               {narrative || (changedCount === 0 ? t("cfPrompt") : "")}
             </p>
           </div>
+
+          {linModel && changedCount > 0 && (
+            <div style={card}>
+              <SensitivityWaterfall
+                model={linModel}
+                base={baseFactors}
+                scenario={scenarioFactors}
+                labelFor={labelFor}
+              />
+            </div>
+          )}
 
           <div style={card}>
             <strong>{t("contribTitle")}</strong>
