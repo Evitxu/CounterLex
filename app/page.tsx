@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { analyze, counterfactual, listFactors } from "@/lib/api";
 import { useI18n } from "@/lib/i18n";
 import type {
@@ -61,23 +61,33 @@ export default function Home() {
     [catalog]
   );
 
+  const inited = useRef(false);
   useEffect(() => {
+    // Guard against React Strict Mode's double effect-invocation in dev, which
+    // would otherwise consume (and clear) the handoff prefill on the first run
+    // and reset to empty on the second.
+    if (inited.current) return;
+    inited.current = true;
+
+    // Read the handoff synchronously, before any await, so it can't be lost.
+    let prefill: Factors | null = null;
+    try {
+      const raw = sessionStorage.getItem("counterlex_prefill");
+      if (raw) {
+        prefill = JSON.parse(raw) as Factors;
+        sessionStorage.removeItem("counterlex_prefill");
+      }
+    } catch {
+      /* ignore */
+    }
+
     (async () => {
       try {
         const cat = await listFactors();
         setCatalog(cat);
-        let base: Factors = Object.fromEntries(cat.map((f) => [f.key, false]));
-        // If arriving from the Analyze Judgment module, preload its factors.
-        try {
-          const raw = sessionStorage.getItem("counterlex_prefill");
-          if (raw) {
-            const pf = JSON.parse(raw) as Factors;
-            base = Object.fromEntries(cat.map((f) => [f.key, !!pf[f.key]]));
-            sessionStorage.removeItem("counterlex_prefill");
-          }
-        } catch {
-          /* ignore */
-        }
+        const base: Factors = Object.fromEntries(
+          cat.map((f) => [f.key, prefill ? !!prefill[f.key] : false])
+        );
         setBaseFactors(base);
         setScenarioFactors(base);
         const res = await counterfactual(base, {});
