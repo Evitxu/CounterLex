@@ -46,6 +46,9 @@ class CaseAnalysis(BaseModel):
     prediction: OutcomePrediction
     precedents: list[PrecedentRef]
     extraction_source: str = "llm"  # "llm" or "keyword" (fallback)
+    # The court's actual decision detected in the text: True=conviction,
+    # False=acquittal, None=couldn't determine.
+    detected_outcome: bool | None = None
 
 
 class JurisprudenceSearch(BaseModel):

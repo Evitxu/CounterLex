@@ -45,6 +45,27 @@ def _keyword_extract(text: str) -> dict[str, bool]:
     return {k: any(kw in hay for kw in _KEYWORDS.get(k, [])) for k in FACTOR_KEYS}
 
 
+_CONVICT_TERMS = ["condeno", "condena", "condenamos", "condenar", "condenatorio"]
+_ACQUIT_TERMS = ["absuelvo", "absuelve", "absolver", "absolucion", "absolutorio"]
+
+
+def detect_outcome(text: str) -> bool | None:
+    """Best-effort detection of the court's decision from the ruling text.
+
+    Returns True (conviction), False (acquittal), or None if it can't be told
+    (no clear verb, or both appear — e.g. mixed counts). Keyword-based and
+    accent-insensitive; works without an LLM.
+    """
+    hay = _norm(text)
+    has_conv = any(term in hay for term in _CONVICT_TERMS)
+    has_acq = any(term in hay for term in _ACQUIT_TERMS)
+    if has_conv and not has_acq:
+        return True
+    if has_acq and not has_conv:
+        return False
+    return None
+
+
 def _coerce(raw: dict) -> dict[str, bool]:
     factors = empty_factors()
     for k in FACTOR_KEYS:

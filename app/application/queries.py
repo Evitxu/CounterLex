@@ -12,7 +12,7 @@ from app.domain.entities import (
     OutcomePrediction,
 )
 from app.domain.factors import FACTORS, GROUND_TRUTH
-from app.infrastructure.factor_extractor import FactorExtractor
+from app.infrastructure.factor_extractor import FactorExtractor, detect_outcome
 from app.infrastructure.outcome_model import OutcomeModel
 from app.infrastructure.repository import CorpusRepository
 from app.infrastructure.retrieval import PrecedentIndex
@@ -81,7 +81,11 @@ class AnalyzeCaseHandler:
             factors, get_settings().top_k_precedents
         )
         return CaseAnalysis(
-            factors=factors, prediction=prediction, precedents=precedents, extraction_source=source
+            factors=factors,
+            prediction=prediction,
+            precedents=precedents,
+            extraction_source=source,
+            detected_outcome=detect_outcome(q.text),
         )
 
 
