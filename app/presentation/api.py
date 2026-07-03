@@ -2,12 +2,13 @@
 
 from __future__ import annotations
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
 from pydantic import BaseModel, Field, field_validator
 
 from app.application.buses import CommandBus, QueryBus
 from app.core.config import get_settings
 from app.core.sanitize import sanitize_text
+from app.infrastructure.pdf_extractor import extract_pdf_text
 from app.application.commands import GenerateCorpusCommand, TrainModelCommand
 from app.application.queries import (
     AnalyzeCaseQuery,
@@ -76,6 +77,38 @@ async def analyze(body: AnalyzeBody, bus: QueryBus = Depends(get_query_bus)) -> 
         result = await bus.ask(AnalyzeCaseQuery(text=body.text))
     except ValueError as exc:
         raise HTTPException(422, str(exc)) from exc
+    assert isinstance(result, CaseAnalysis)
+    return result
+
+
+@router.post("/analyze/pdf", response_model=CaseAnalysis)
+async def analyze_pdf(
+    file: UploadFile = File(...), bus: QueryBus = Depends(get_query_bus)
+) -> CaseAnalysis:
+    settings = get_settings()
+    is_pdf = (file.content_type == "application/pdf") or (
+        file.filename or ""
+    ).lower().endswith(".pdf")
+    if not is_pdf:
+        raise HTTPException(415, "Only PDF files are supported.")
+
+    data = await file.read()
+    if not data:
+        raise HTTPException(400, "Empty file.")
+    if len(data) > settings.max_pdf_bytes:
+        mb = settings.max_pdf_bytes // (1024 * 1024)
+        raise HTTPException(413, f"PDF exceeds {mb} MB.")
+
+    try:
+        raw_text = extract_pdf_text(data, settings.max_pdf_pages)
+    except ValueError as exc:
+        raise HTTPException(422, str(exc)) from exc
+
+    text = sanitize_text(raw_text)[: settings.max_case_chars]
+    if len(text) < 10:
+        raise HTTPException(422, "Could not extract enough text (is it a scanned PDF?).")
+
+    result = await bus.ask(AnalyzeCaseQuery(text=text))
     assert isinstance(result, CaseAnalysis)
     return result
 
