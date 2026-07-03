@@ -30,8 +30,14 @@ def true_probability(factors: dict[str, bool]) -> float:
     return _sigmoid(logit)
 
 
-# Spanish court abbreviations, for realistic-looking synthetic references.
-_COURTS = ["STS", "SAP", "STSJ", "SAN"]
+# Full Spanish court names (spelled out so non-experts can read them), used for
+# realistic-looking references on the synthetic corpus.
+_COURTS = [
+    "Tribunal Supremo",
+    "Audiencia Provincial",
+    "Tribunal Superior de Justicia",
+    "Audiencia Nacional",
+]
 
 
 def generate_corpus(size: int, seed: int) -> list[Case]:

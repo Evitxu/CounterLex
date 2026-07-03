@@ -21,7 +21,7 @@ REAL_SEED: list[Case] = [
             "del delito con sus huellas. Empleó violencia sobre la víctima."
         ),
         factors={"forensic_evidence": True, "eyewitness": True, "weapon_present": True, "violence_used": True},
-        convicted=True, is_real=True, reference="DEMO-REAL-1",
+        convicted=True, is_real=True, reference="Caso de ejemplo 1",
     ),
     Case(
         text=(
@@ -29,7 +29,7 @@ REAL_SEED: list[Case] = [
             "autorización judicial. El acusado presentó además una coartada verificable."
         ),
         factors={"evidence_inadmissible": True, "alibi": True},
-        convicted=False, is_real=True, reference="DEMO-REAL-2",
+        convicted=False, is_real=True, reference="Caso de ejemplo 2",
     ),
     Case(
         text=(
@@ -37,7 +37,7 @@ REAL_SEED: list[Case] = [
             "Existió premeditación."
         ),
         factors={"confession": True, "prior_convictions": True, "premeditation": True},
-        convicted=True, is_real=True, reference="DEMO-REAL-3",
+        convicted=True, is_real=True, reference="Caso de ejemplo 3",
     ),
     Case(
         text=(
@@ -45,7 +45,7 @@ REAL_SEED: list[Case] = [
             "cuestionada. El acusado alegó legítima defensa."
         ),
         factors={"witness_unreliable": True, "self_defense": True},
-        convicted=False, is_real=True, reference="DEMO-REAL-4",
+        convicted=False, is_real=True, reference="Caso de ejemplo 4",
     ),
 ]
 
