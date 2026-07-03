@@ -2,13 +2,17 @@
 
 from __future__ import annotations
 
-from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
+from datetime import datetime, timezone
+
+from fastapi import APIRouter, Depends, File, HTTPException, Response, UploadFile
 from pydantic import BaseModel, Field, field_validator
 
 from app.application.buses import CommandBus, QueryBus
 from app.core.config import get_settings
 from app.core.sanitize import sanitize_text
+from app.domain.entities import CounterfactualResult
 from app.infrastructure.pdf_extractor import extract_pdf_text
+from app.infrastructure.report import build_report_pdf
 from app.application.commands import GenerateCorpusCommand, TrainModelCommand
 from app.application.queries import (
     AnalyzeCaseQuery,
@@ -153,3 +157,25 @@ async def counterfactual(
         raise HTTPException(422, str(exc)) from exc
     assert isinstance(result, CounterfactualResult)
     return result
+
+
+# ---- PDF report ----
+class ReportBody(BaseModel):
+    factors: dict[str, bool]
+    overrides: dict[str, bool] = {}
+    lang: str = "es"
+
+
+@router.post("/report")
+async def report(body: ReportBody, bus: QueryBus = Depends(get_query_bus)) -> Response:
+    result = await bus.ask(
+        CounterfactualQuery(factors=body.factors, overrides=body.overrides)
+    )
+    assert isinstance(result, CounterfactualResult)
+    stamp = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
+    pdf = build_report_pdf(result, body.factors, body.lang, stamp)
+    return Response(
+        content=pdf,
+        media_type="application/pdf",
+        headers={"Content-Disposition": 'attachment; filename="counterlex-report.pdf"'},
+    )
