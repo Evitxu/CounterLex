@@ -40,6 +40,12 @@ export interface CaseAnalysis {
   extraction_source: string; // "llm" | "keyword"
 }
 
+export interface JurisprudenceSearch {
+  query_factors: Factors;
+  extraction_source: string;
+  results: PrecedentRef[];
+}
+
 export interface CounterfactualResult {
   base: OutcomePrediction;
   counterfactual: OutcomePrediction;

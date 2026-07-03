@@ -4,6 +4,7 @@ import type {
   Evaluation,
   Factor,
   Factors,
+  JurisprudenceSearch,
 } from "./types";
 
 const API_BASE =
@@ -36,6 +37,14 @@ export function analyzePdf(file: File): Promise<CaseAnalysis> {
   form.append("file", file);
   // No Content-Type header: the browser sets the multipart boundary.
   return fetch(`${API_BASE}/analyze/pdf`, { method: "POST", body: form }).then(json<CaseAnalysis>);
+}
+
+export function searchJurisprudence(text: string, topK = 10): Promise<JurisprudenceSearch> {
+  return fetch(`${API_BASE}/search`, {
+    method: "POST",
+    headers: jsonHeaders,
+    body: JSON.stringify({ text, top_k: topK }),
+  }).then(json<JurisprudenceSearch>);
 }
 
 export function counterfactual(

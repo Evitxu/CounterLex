@@ -14,7 +14,7 @@ interface Item {
 const ITEMS: Item[] = [
   { href: "/", icon: "⚖", key: "nav.counterfactual" },
   { href: "/analyze", icon: "📄", key: "nav.analyze" },
-  { href: "/search", icon: "🔍", key: "nav.search", soon: true },
+  { href: "/search", icon: "🔍", key: "nav.search" },
   { href: "/reports", icon: "📑", key: "nav.reports", soon: true },
 ];
 
