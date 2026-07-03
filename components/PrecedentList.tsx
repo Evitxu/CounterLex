@@ -16,11 +16,14 @@ export default function PrecedentList({
     return <p style={{ color: "#888", fontSize: 14 }}>{t("precNone")}</p>;
   }
   return (
-    <div className="cl-cards">
-      {precedents.map((p) => (
-        <Card key={p.id} p={p} labelFor={labelFor} t={t} />
-      ))}
-    </div>
+    <>
+      <div className="cl-cards">
+        {precedents.map((p) => (
+          <Card key={p.id} p={p} labelFor={labelFor} t={t} />
+        ))}
+      </div>
+      <p style={{ fontSize: 11, color: "#999", marginTop: 8 }}>{t("precCaption")}</p>
+    </>
   );
 }
 
