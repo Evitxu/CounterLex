@@ -34,9 +34,12 @@ def create_app() -> FastAPI:
         description="Counterfactual legal precedent explorer (CQRS + interpretable outcome model).",
         lifespan=lifespan,
     )
+    # FRONTEND_ORIGIN may be a comma-separated list (e.g. the Railway HTTPS URL
+    # plus http://localhost:3000 for local dev).
+    origins = [o.strip() for o in settings.frontend_origin.split(",") if o.strip()]
     app.add_middleware(
         CORSMiddleware,
-        allow_origins=[settings.frontend_origin],
+        allow_origins=origins,
         allow_methods=["*"],
         allow_headers=["*"],
     )
