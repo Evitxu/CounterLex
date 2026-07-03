@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { analyze, counterfactual, listFactors } from "@/lib/api";
+import { useI18n } from "@/lib/i18n";
 import type {
   CounterfactualResult,
   Factor,
@@ -15,10 +16,6 @@ import ContributionBars from "@/components/ContributionBars";
 import PrecedentList from "@/components/PrecedentList";
 import EvaluationPanel from "@/components/EvaluationPanel";
 
-const EXAMPLE =
-  "Un testigo presencial identificó al acusado y se halló un arma en el lugar de " +
-  "los hechos. El acusado no confesó y la defensa cuestiona la fiabilidad del testigo.";
-
 const card: React.CSSProperties = {
   background: "#fff",
   border: "1px solid #e2e4ea",
@@ -28,6 +25,7 @@ const card: React.CSSProperties = {
 };
 
 export default function Home() {
+  const { t, lang } = useI18n();
   const [catalog, setCatalog] = useState<Factor[]>([]);
   const [caseText, setCaseText] = useState("");
   const [baseFactors, setBaseFactors] = useState<Factors>({});
@@ -39,9 +37,17 @@ export default function Home() {
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
 
-  const labels = useMemo(
-    () => Object.fromEntries(catalog.map((f) => [f.key, f.label_es])),
+  const byKey = useMemo(
+    () => Object.fromEntries(catalog.map((f) => [f.key, f])),
     [catalog]
+  );
+  const labelFor = useCallback(
+    (key: string) => {
+      const f = byKey[key];
+      if (!f) return key;
+      return lang === "en" ? f.label_en : f.label_es;
+    },
+    [byKey, lang]
   );
 
   const normalize = useCallback(
@@ -140,61 +146,74 @@ export default function Home() {
     (k) => !!scenarioFactors[k] !== !!baseFactors[k]
   ).length;
 
+  // Localized narrative built from the structured counterfactual result.
+  const narrative = useMemo(() => {
+    if (!cf) return "";
+    const changed = Object.keys(cf.changed);
+    if (changed.length === 0) return "";
+    const labels = changed.map(labelFor).join(", ");
+    const dir = cf.delta < 0 ? t("dirDown") : cf.delta > 0 ? t("dirUp") : t("dirSame");
+    const d = Math.round(cf.delta * 100);
+    const n = cf.driving_precedents.length;
+    const conv = cf.driving_precedents.filter((p) => p.convicted).length;
+    return t("cfNarrative", {
+      labels,
+      dir,
+      a: Math.round(cf.base.probability * 100),
+      b: Math.round(cf.counterfactual.probability * 100),
+      d: d > 0 ? `+${d}` : `${d}`,
+      n,
+      r: n ? Math.round((100 * conv) / n) : 0,
+    });
+  }, [cf, labelFor, t]);
+
   return (
     <section>
-      <h1 style={{ marginTop: 0 }}>¿Y si un hecho hubiera sido distinto?</h1>
-      <p style={{ color: "#555", maxWidth: 760 }}>
-        Describe un caso penal o ajusta los factores. El modelo estima la
-        probabilidad de condena; cambia cualquier factor para ver el efecto
-        <strong> contrafactual</strong> y los precedentes que lo explican.
-      </p>
-      {err && (
-        <p style={{ color: "crimson" }}>
-          {err} — ¿está el backend en marcha en el puerto 8000?
-        </p>
-      )}
+      <h1 style={{ marginTop: 0 }}>{t("h1")}</h1>
+      <p style={{ color: "#555", maxWidth: 760 }}>{t("intro")}</p>
+      {err && <p style={{ color: "crimson" }}>{err} — {t("backendError")}</p>}
 
-      <div style={{ display: "grid", gridTemplateColumns: "minmax(0, 1fr) minmax(0, 1.1fr)", gap: 20 }}>
+      <div className="cl-grid">
         {/* ---- Left: input + factors ---- */}
         <div>
           <div style={card}>
-            <label style={{ fontSize: 13, color: "#444", fontWeight: 600 }}>Descripción del caso</label>
+            <label style={{ fontSize: 13, color: "#444", fontWeight: 600 }}>{t("caseLabel")}</label>
             <textarea
               value={caseText}
               onChange={(e) => setCaseText(e.target.value)}
               rows={5}
-              placeholder="p. ej. Se halló el arma con huellas del acusado y un testigo lo identificó…"
+              placeholder={t("casePlaceholder")}
               style={{ width: "100%", resize: "vertical", marginTop: 6, padding: 8 }}
             />
-            <div style={{ display: "flex", gap: 8, marginTop: 8, alignItems: "center" }}>
+            <div style={{ display: "flex", gap: 8, marginTop: 8, alignItems: "center", flexWrap: "wrap" }}>
               <button onClick={runAnalyze} disabled={busy || caseText.trim().length < 10}>
-                {busy ? "Analizando…" : "Analizar caso"}
+                {busy ? t("analyzing") : t("analyze")}
               </button>
-              <button type="button" onClick={() => setCaseText(EXAMPLE)} disabled={busy}>
-                Ejemplo
+              <button type="button" onClick={() => setCaseText(t("exampleText"))} disabled={busy}>
+                {t("example")}
               </button>
               {source && (
                 <span style={{ fontSize: 12, color: "#888" }}>
-                  extracción: {source === "llm" ? "IA (Ollama)" : "palabras clave"}
+                  {t("extraction")} {source === "llm" ? t("srcAI") : t("srcKeyword")}
                 </span>
               )}
             </div>
           </div>
 
           <div style={card}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
-              <strong>Factores del caso</strong>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10, gap: 8, flexWrap: "wrap" }}>
+              <strong>{t("factorsTitle")}</strong>
               <div style={{ display: "flex", gap: 8 }}>
                 <button type="button" onClick={resetScenario} disabled={changedCount === 0}>
-                  Restablecer
+                  {t("reset")}
                 </button>
-                <button type="button" onClick={setAsBaseline} disabled={busy || changedCount === 0} title="Fijar el escenario actual como referencia">
-                  Fijar como base
+                <button type="button" onClick={setAsBaseline} disabled={busy || changedCount === 0} title={t("setBaselineTitle")}>
+                  {t("setBaseline")}
                 </button>
               </div>
             </div>
             {catalog.length === 0 ? (
-              <p style={{ color: "#888" }}>Cargando factores…</p>
+              <p style={{ color: "#888" }}>{t("loadingFactors")}</p>
             ) : (
               <FactorToggles catalog={catalog} values={scenarioFactors} baseline={baseFactors} onToggle={toggle} />
             )}
@@ -208,37 +227,31 @@ export default function Home() {
           </div>
 
           <div style={card}>
-            <strong>Explicación contrafactual</strong>
+            <strong>{t("cfTitle")}</strong>
             <p style={{ margin: "8px 0 0", color: "#333", lineHeight: 1.5 }}>
-              {cf?.narrative ??
-                (changedCount === 0
-                  ? "Modifica uno o más factores para ver cómo cambia la probabilidad respecto a la base."
-                  : "")}
+              {narrative || (changedCount === 0 ? t("cfPrompt") : "")}
             </p>
           </div>
 
           <div style={card}>
-            <strong>Influencia de cada factor</strong>
+            <strong>{t("contribTitle")}</strong>
             <div style={{ marginTop: 10 }}>
-              <ContributionBars contributions={contributions} />
+              <ContributionBars contributions={contributions} labelFor={labelFor} />
             </div>
           </div>
 
           <div style={card}>
-            <strong>Precedentes {cf ? "que respaldan el escenario" : "similares"}</strong>
+            <strong>{cf ? t("precTitleCf") : t("precTitleSim")}</strong>
             <div style={{ marginTop: 10 }}>
-              <PrecedentList precedents={precedents} labels={labels} />
+              <PrecedentList precedents={precedents} labelFor={labelFor} />
             </div>
           </div>
         </div>
       </div>
 
-      <EvaluationPanel />
+      <EvaluationPanel labelFor={labelFor} />
 
-      <p style={{ color: "#999", fontSize: 12, marginTop: 16 }}>
-        Sistema analítico con fines académicos. Corpus mayoritariamente sintético;
-        las probabilidades son estimaciones de un modelo interpretable, no asesoramiento jurídico.
-      </p>
+      <p style={{ color: "#999", fontSize: 12, marginTop: 16 }}>{t("disclaimer")}</p>
     </section>
   );
 }

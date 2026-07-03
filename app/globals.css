@@ -1,0 +1,21 @@
+* { box-sizing: border-box; }
+html, body { max-width: 100%; overflow-x: hidden; }
+
+/* Main two-column layout → single column on narrow screens */
+.cl-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr);
+  gap: 20px;
+}
+@media (max-width: 880px) {
+  .cl-grid { grid-template-columns: 1fr; }
+}
+
+/* Let wide content (tables) scroll instead of breaking the page */
+.cl-scroll-x { overflow-x: auto; }
+
+/* Contribution rows: tighten labels on small screens */
+@media (max-width: 480px) {
+  .cl-contrib-label { width: 96px !important; }
+  .cl-contrib-value { width: 44px !important; }
+}
