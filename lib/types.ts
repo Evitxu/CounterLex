@@ -38,6 +38,7 @@ export interface CaseAnalysis {
   prediction: OutcomePrediction;
   precedents: PrecedentRef[];
   extraction_source: string; // "llm" | "keyword"
+  detected_outcome: boolean | null; // true=conviction, false=acquittal, null=unknown
 }
 
 export interface JurisprudenceSearch {

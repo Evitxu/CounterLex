@@ -82,6 +82,10 @@ export default function AnalyzePage() {
     [model, analysis]
   );
   const detected = analysis ? Object.keys(analysis.factors).filter((k) => analysis.factors[k]) : [];
+  const verdict = analysis ? analysis.detected_outcome : null;
+  const modelConvicts = analysis ? analysis.prediction.probability >= 0.5 : false;
+  const agree = verdict !== null && modelConvicts === verdict;
+  const opinionColor = verdict === null ? "#c7ccd6" : agree ? "#0a7d28" : "#f0a500";
 
   function openInSimulator() {
     if (!analysis) return;
@@ -138,10 +142,38 @@ export default function AnalyzePage() {
       </div>
 
       {analysis && (
-        <div className="cl-grid">
-          <div>
-            <div style={card}>
-              <ProbabilityGauge scenario={analysis.prediction.probability} baseline={null} />
+        <>
+          <div style={{ ...card, borderLeft: `4px solid ${opinionColor}` }}>
+            <strong>{t("opinionTitle")}</strong>
+            {verdict === null ? (
+              <p style={{ color: "#888", margin: "8px 0 0", fontSize: 14 }}>{t("opinionUnknown")}</p>
+            ) : (
+              <>
+                <div style={{ display: "flex", gap: 28, flexWrap: "wrap", margin: "10px 0" }}>
+                  <div>
+                    <div style={{ fontSize: 12, color: "#777" }}>{t("opinionActual")}</div>
+                    <strong>{verdict ? t("convicted") : t("acquitted")}</strong>
+                  </div>
+                  <div>
+                    <div style={{ fontSize: 12, color: "#777" }}>{t("opinionModel")}</div>
+                    <strong>
+                      {modelConvicts ? t("convicted") : t("acquitted")} (
+                      {Math.round(analysis.prediction.probability * 100)}%)
+                    </strong>
+                  </div>
+                </div>
+                <p style={{ fontWeight: 700, color: agree ? "#0a7d28" : "#b8860b", margin: "4px 0" }}>
+                  {agree ? t("opinionAgree") : t("opinionDisagree")}
+                </p>
+              </>
+            )}
+            <p style={{ fontSize: 12, color: "#999", margin: "6px 0 0" }}>{t("opinionNote")}</p>
+          </div>
+
+          <div className="cl-grid">
+            <div>
+              <div style={card}>
+                <ProbabilityGauge scenario={analysis.prediction.probability} baseline={null} />
             </div>
             <div style={card}>
               <strong>{t("analyzeInfluential")}</strong>
@@ -187,6 +219,7 @@ export default function AnalyzePage() {
             </div>
           </div>
         </div>
+        </>
       )}
     </section>
   );
