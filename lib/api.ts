@@ -31,6 +31,13 @@ export function analyze(text: string): Promise<CaseAnalysis> {
   }).then(json<CaseAnalysis>);
 }
 
+export function analyzePdf(file: File): Promise<CaseAnalysis> {
+  const form = new FormData();
+  form.append("file", file);
+  // No Content-Type header: the browser sets the multipart boundary.
+  return fetch(`${API_BASE}/analyze/pdf`, { method: "POST", body: form }).then(json<CaseAnalysis>);
+}
+
 export function counterfactual(
   factors: Factors,
   overrides: Factors

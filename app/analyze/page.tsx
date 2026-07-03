@@ -1,8 +1,8 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { analyze, listFactors } from "@/lib/api";
+import { analyze, analyzePdf, listFactors } from "@/lib/api";
 import { useI18n } from "@/lib/i18n";
 import { presentFactorEffects, reconstructModel } from "@/lib/model";
 import type { CaseAnalysis, Factor } from "@/lib/types";
@@ -25,6 +25,10 @@ export default function AnalyzePage() {
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
   const [analysis, setAnalysis] = useState<CaseAnalysis | null>(null);
+  const [pdfName, setPdfName] = useState<string | null>(null);
+  const fileRef = useRef<HTMLInputElement>(null);
+
+  const MAX_PDF = 20 * 1024 * 1024;
 
   useEffect(() => {
     listFactors().then(setCatalog).catch((e) => setErr((e as Error).message));
@@ -47,6 +51,26 @@ export default function AnalyzePage() {
       setAnalysis(await analyze(text));
     } catch (e) {
       setErr((e as Error).message);
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function onPdfSelected(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (fileRef.current) fileRef.current.value = ""; // allow re-selecting same file
+    if (!file) return;
+    if (file.size > MAX_PDF) {
+      setErr(t("pdfTooLarge"));
+      return;
+    }
+    setBusy(true);
+    setErr(null);
+    setPdfName(file.name);
+    try {
+      setAnalysis(await analyzePdf(file));
+    } catch (e2) {
+      setErr((e2 as Error).message);
     } finally {
       setBusy(false);
     }
@@ -84,9 +108,27 @@ export default function AnalyzePage() {
           <button className="btn btn-primary" onClick={run} disabled={busy || text.trim().length < 10}>
             {busy ? t("analyzeRunning") : t("analyzeRun")}
           </button>
+          <span style={{ color: "#999", fontSize: 13 }}>{t("orSeparator")}</span>
+          <input
+            ref={fileRef}
+            type="file"
+            accept="application/pdf,.pdf"
+            onChange={onPdfSelected}
+            style={{ display: "none" }}
+          />
+          <button
+            className="btn btn-secondary"
+            type="button"
+            onClick={() => fileRef.current?.click()}
+            disabled={busy}
+            title={t("pdfHint")}
+          >
+            📎 {t("uploadPdf")}
+          </button>
           <button className="btn btn-secondary" type="button" onClick={() => setText(t("exampleText"))} disabled={busy}>
             {t("example")}
           </button>
+          {pdfName && <span style={{ fontSize: 12, color: "#666" }}>{pdfName}</span>}
           {analysis && (
             <span style={{ fontSize: 12, color: "#888" }}>
               {t("extraction")} {analysis.extraction_source === "llm" ? t("srcAI") : t("srcKeyword")}
