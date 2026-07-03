@@ -258,15 +258,12 @@ export default function Home() {
           <div style={card}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10, gap: 8, flexWrap: "wrap" }}>
               <strong>{t("factorsTitle")}</strong>
-              <div style={{ display: "flex", gap: 8 }}>
+              <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
                 <button className="btn btn-secondary" type="button" onClick={resetScenario} disabled={changedCount === 0}>
                   {t("reset")}
                 </button>
                 <button className="btn btn-secondary" type="button" onClick={setAsBaseline} disabled={busy || changedCount === 0} title={t("setBaselineTitle")}>
                   {t("setBaseline")}
-                </button>
-                <button className="btn btn-secondary" type="button" onClick={downloadPdf} disabled={reporting}>
-                  📑 {reporting ? t("generating") : t("downloadReport")}
                 </button>
               </div>
             </div>
@@ -283,6 +280,16 @@ export default function Home() {
           <div style={card}>
             <ProbabilityGauge scenario={scenarioProb} baseline={baselineProb} />
           </div>
+
+          <button
+            className="btn btn-secondary"
+            type="button"
+            onClick={downloadPdf}
+            disabled={reporting}
+            style={{ width: "100%", marginBottom: 16 }}
+          >
+            📑 {reporting ? t("generating") : t("downloadReport")}
+          </button>
 
           <div style={card}>
             <strong>{t("cfTitle")}</strong>
