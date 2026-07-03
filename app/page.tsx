@@ -187,10 +187,10 @@ export default function Home() {
               style={{ width: "100%", resize: "vertical", marginTop: 6, padding: 8 }}
             />
             <div style={{ display: "flex", gap: 8, marginTop: 8, alignItems: "center", flexWrap: "wrap" }}>
-              <button onClick={runAnalyze} disabled={busy || caseText.trim().length < 10}>
+              <button className="btn btn-primary" onClick={runAnalyze} disabled={busy || caseText.trim().length < 10}>
                 {busy ? t("analyzing") : t("analyze")}
               </button>
-              <button type="button" onClick={() => setCaseText(t("exampleText"))} disabled={busy}>
+              <button className="btn btn-secondary" type="button" onClick={() => setCaseText(t("exampleText"))} disabled={busy}>
                 {t("example")}
               </button>
               {source && (
@@ -205,10 +205,10 @@ export default function Home() {
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10, gap: 8, flexWrap: "wrap" }}>
               <strong>{t("factorsTitle")}</strong>
               <div style={{ display: "flex", gap: 8 }}>
-                <button type="button" onClick={resetScenario} disabled={changedCount === 0}>
+                <button className="btn btn-secondary" type="button" onClick={resetScenario} disabled={changedCount === 0}>
                   {t("reset")}
                 </button>
-                <button type="button" onClick={setAsBaseline} disabled={busy || changedCount === 0} title={t("setBaselineTitle")}>
+                <button className="btn btn-secondary" type="button" onClick={setAsBaseline} disabled={busy || changedCount === 0} title={t("setBaselineTitle")}>
                   {t("setBaseline")}
                 </button>
               </div>

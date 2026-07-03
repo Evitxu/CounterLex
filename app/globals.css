@@ -19,3 +19,44 @@ html, body { max-width: 100%; overflow-x: hidden; }
   .cl-contrib-label { width: 96px !important; }
   .cl-contrib-value { width: 44px !important; }
 }
+
+/* ---- Buttons ---- */
+.btn {
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  padding: 9px 16px;
+  border-radius: 9px;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: background .15s, border-color .15s, box-shadow .15s, transform .04s;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+.btn:active:not(:disabled) { transform: translateY(1px); }
+.btn:disabled { opacity: .45; cursor: not-allowed; }
+.btn:focus-visible { outline: none; box-shadow: 0 0 0 3px rgba(48, 80, 176, .30); }
+
+.btn-primary { background: #3050b0; color: #fff; border-color: #3050b0; }
+.btn-primary:hover:not(:disabled) { background: #24409a; box-shadow: 0 3px 10px rgba(48, 80, 176, .35); }
+
+.btn-secondary { background: #fff; color: #2b3444; border-color: #d2d7e0; }
+.btn-secondary:hover:not(:disabled) { background: #f2f4f8; border-color: #b9c0cc; }
+
+/* ---- Text inputs ---- */
+textarea, input[type="text"], input[type="date"], input[type="number"] {
+  font: inherit;
+  border: 1px solid #d2d7e0;
+  border-radius: 9px;
+  background: #fff;
+}
+textarea:focus, input:focus {
+  outline: none;
+  border-color: #3050b0;
+  box-shadow: 0 0 0 3px rgba(48, 80, 176, .15);
+}
+
+/* On small screens let action buttons stretch full-width for easy tapping */
+@media (max-width: 520px) {
+  .btn { flex: 1 1 auto; text-align: center; }
+}
