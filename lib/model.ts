@@ -53,6 +53,23 @@ export interface WaterfallStep {
   delta: number;
 }
 
+export interface CaseDiff {
+  key: string;
+  delta: number; // this factor's contribution to the (A − B) log-odds gap
+}
+
+/** Decompose why case A and case B differ: per differing factor, weight×(a−b). */
+export function compareCases(m: LinModel, a: Factors, b: Factors): CaseDiff[] {
+  const out: CaseDiff[] = [];
+  for (const k of Object.keys(m.weights)) {
+    const av = a[k] ? 1 : 0;
+    const bv = b[k] ? 1 : 0;
+    if (av !== bv) out.push({ key: k, delta: m.weights[k] * (av - bv) });
+  }
+  out.sort((x, y) => Math.abs(y.delta) - Math.abs(x.delta));
+  return out;
+}
+
 /** Base probability, then apply each changed factor one at a time. */
 export function waterfall(
   m: LinModel,
