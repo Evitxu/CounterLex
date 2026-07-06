@@ -109,9 +109,19 @@ async def analyze_pdf(
     except ValueError as exc:
         raise HTTPException(422, str(exc)) from exc
 
-    text = sanitize_text(raw_text)[: settings.max_case_chars]
-    if len(text) < 10:
+    clean = sanitize_text(raw_text)
+    if len(clean) < 10:
         raise HTTPException(422, "Could not extract enough text (is it a scanned PDF?).")
+
+    # Keep the beginning (facts/reasoning → factors) AND the end (the "fallo" →
+    # verdict), since the operative part sits at the end of long judgments.
+    limit = settings.max_case_chars
+    if len(clean) > limit:
+        head_len = limit * 2 // 3
+        tail_len = limit - head_len
+        text = clean[:head_len] + "\n[...]\n" + clean[-tail_len:]
+    else:
+        text = clean
 
     result = await bus.ask(AnalyzeCaseQuery(text=text))
     assert isinstance(result, CaseAnalysis)

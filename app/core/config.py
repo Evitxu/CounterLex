@@ -27,11 +27,11 @@ class Settings(BaseSettings):
     top_k_precedents: int = Field(default=6, ge=1, le=50)
 
     # Max length of a user-submitted case description (XSS/DoS guard).
-    max_case_chars: int = Field(default=5000, ge=10)
+    max_case_chars: int = Field(default=12000, ge=10)
 
     # PDF upload limits for the Analyze Judgment module.
     max_pdf_bytes: int = Field(default=20 * 1024 * 1024, ge=1024)  # 20 MB
-    max_pdf_pages: int = Field(default=60, ge=1)
+    max_pdf_pages: int = Field(default=500, ge=1)
 
     frontend_origin: str = "http://localhost:3000"
 
