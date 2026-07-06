@@ -14,7 +14,7 @@ import unicodedata
 from app.core.config import get_settings
 from app.core.logging import get_logger
 from app.domain.factors import FACTORS, FACTOR_KEYS, empty_factors
-from app.infrastructure.ollama_client import OllamaClient
+from app.infrastructure.llm_client import LlmClient
 
 log = get_logger(__name__)
 
@@ -80,7 +80,7 @@ def _coerce(raw: dict) -> dict[str, bool]:
 
 
 class FactorExtractor:
-    def __init__(self, llm: OllamaClient) -> None:
+    def __init__(self, llm: LlmClient) -> None:
         self._llm = llm
 
     def _system_prompt(self) -> str:

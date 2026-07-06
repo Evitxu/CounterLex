@@ -25,7 +25,7 @@ from app.application.queries import (
 )
 from app.core.config import get_settings
 from app.infrastructure.factor_extractor import FactorExtractor
-from app.infrastructure.ollama_client import OllamaClient
+from app.infrastructure.llm_client import build_llm_client
 from app.infrastructure.repository import CorpusRepository
 
 
@@ -36,7 +36,7 @@ def get_repo() -> CorpusRepository:
 
 @lru_cache
 def _extractor() -> FactorExtractor:
-    return FactorExtractor(OllamaClient())
+    return FactorExtractor(build_llm_client())
 
 
 @lru_cache

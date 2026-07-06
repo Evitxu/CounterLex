@@ -1,4 +1,5 @@
 from functools import lru_cache
+from typing import Literal
 
 from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -6,6 +7,16 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env", case_sensitive=False, extra="ignore")
+
+    # LLM provider selection:
+    #   "ollama" — local, free (default for dev).
+    #   "openai" — any OpenAI-compatible API (e.g. Groq free tier) for cloud/Railway.
+    llm_provider: Literal["ollama", "openai"] = "ollama"
+    # OpenAI-compatible settings (used when llm_provider == "openai").
+    # Defaults target Groq; set LLM_API_KEY to your free Groq key.
+    llm_base_url: str | None = None      # default https://api.groq.com/openai/v1
+    llm_model: str | None = None         # default llama-3.1-8b-instant
+    llm_api_key: str | None = None
 
     # Ollama (local, free LLM). Requires a running daemon with the model pulled:
     #   ollama pull llama3.1
