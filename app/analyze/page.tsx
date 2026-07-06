@@ -37,6 +37,19 @@ export default function AnalyzePage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // Persist the analysed case so the Reports module can pick it up directly.
+  useEffect(() => {
+    if (!analysis) return;
+    try {
+      localStorage.setItem(
+        "counterlex_last_case",
+        JSON.stringify({ factors: analysis.factors, scenario: analysis.factors })
+      );
+    } catch {
+      /* ignore */
+    }
+  }, [analysis]);
+
   const byKey = useMemo(() => Object.fromEntries(catalog.map((f) => [f.key, f])), [catalog]);
   const labelFor = useCallback(
     (k: string) => {
