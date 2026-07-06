@@ -32,11 +32,36 @@ export function analyze(text: string): Promise<CaseAnalysis> {
   }).then(json<CaseAnalysis>);
 }
 
-export function analyzePdf(file: File): Promise<CaseAnalysis> {
-  const form = new FormData();
-  form.append("file", file);
-  // No Content-Type header: the browser sets the multipart boundary.
-  return fetch(`${API_BASE}/analyze/pdf`, { method: "POST", body: form }).then(json<CaseAnalysis>);
+// Uses XMLHttpRequest (not fetch) so we can report upload progress via
+// upload.onprogress. onProgress receives 0–100 as the file is sent.
+export function analyzePdf(
+  file: File,
+  onProgress?: (pct: number) => void
+): Promise<CaseAnalysis> {
+  return new Promise<CaseAnalysis>((resolve, reject) => {
+    const form = new FormData();
+    form.append("file", file);
+    const xhr = new XMLHttpRequest();
+    xhr.open("POST", `${API_BASE}/analyze/pdf`);
+    xhr.upload.onprogress = (e) => {
+      if (onProgress && e.lengthComputable) {
+        onProgress(Math.round((e.loaded / e.total) * 100));
+      }
+    };
+    xhr.onload = () => {
+      if (xhr.status >= 200 && xhr.status < 300) {
+        try {
+          resolve(JSON.parse(xhr.responseText) as CaseAnalysis);
+        } catch {
+          reject(new Error("Invalid response from server"));
+        }
+      } else {
+        reject(new Error(`API ${xhr.status}: ${xhr.responseText || xhr.statusText}`));
+      }
+    };
+    xhr.onerror = () => reject(new Error("Network error during upload"));
+    xhr.send(form);
+  });
 }
 
 export function searchJurisprudence(text: string, topK = 10): Promise<JurisprudenceSearch> {

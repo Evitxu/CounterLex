@@ -14,6 +14,8 @@ import { useI18n } from "@/lib/i18n";
 interface BusyValue {
   // Wrap any promise: shows a blocking overlay while it runs.
   run: <T>(p: Promise<T>) => Promise<T>;
+  // Set a 0–100 upload percentage (or null for an indeterminate spinner).
+  setProgress: (pct: number | null) => void;
 }
 
 const BusyContext = createContext<BusyValue | null>(null);
@@ -21,6 +23,7 @@ const BusyContext = createContext<BusyValue | null>(null);
 export function BusyProvider({ children }: { children: ReactNode }) {
   const [count, setCount] = useState(0);
   const [show, setShow] = useState(false);
+  const [progress, setProgress] = useState<number | null>(null);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Only reveal the overlay if work lasts >200ms — avoids flicker on fast ops.
@@ -33,6 +36,7 @@ export function BusyProvider({ children }: { children: ReactNode }) {
         timer.current = null;
       }
       setShow(false);
+      setProgress(null);
     }
   }, [count]);
 
@@ -46,15 +50,16 @@ export function BusyProvider({ children }: { children: ReactNode }) {
   }, []);
 
   return (
-    <BusyContext.Provider value={{ run }}>
+    <BusyContext.Provider value={{ run, setProgress }}>
       {children}
-      {show && <Overlay />}
+      {show && <Overlay progress={progress} />}
     </BusyContext.Provider>
   );
 }
 
-function Overlay() {
+function Overlay({ progress }: { progress: number | null }) {
   const { t } = useI18n();
+  const determinate = progress !== null;
   return (
     <div
       role="alertdialog"
@@ -75,14 +80,36 @@ function Overlay() {
           background: "#fff",
           borderRadius: 12,
           padding: "18px 24px",
-          display: "flex",
-          alignItems: "center",
-          gap: 14,
+          minWidth: 240,
           boxShadow: "0 10px 40px rgba(0,0,0,0.25)",
         }}
       >
-        <span className="cl-spinner" aria-hidden="true" />
-        <span style={{ fontWeight: 600 }}>{t("processing")}</span>
+        <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+          <span className="cl-spinner" aria-hidden="true" />
+          <span style={{ fontWeight: 600 }}>
+            {determinate ? `${t("uploading")} ${progress}%` : t("processing")}
+          </span>
+        </div>
+        {determinate && (
+          <div
+            style={{
+              marginTop: 12,
+              height: 8,
+              borderRadius: 4,
+              background: "#eceef3",
+              overflow: "hidden",
+            }}
+          >
+            <div
+              style={{
+                width: `${progress}%`,
+                height: "100%",
+                background: "#3050b0",
+                transition: "width 0.15s linear",
+              }}
+            />
+          </div>
+        )}
       </div>
     </div>
   );

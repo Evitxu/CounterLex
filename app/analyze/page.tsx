@@ -20,7 +20,7 @@ const card: React.CSSProperties = {
 
 export default function AnalyzePage() {
   const { t, lang } = useI18n();
-  const { run: track } = useBusy();
+  const { run: track, setProgress } = useBusy();
   const router = useRouter();
   const [catalog, setCatalog] = useState<Factor[]>([]);
   const [text, setText] = useState("");
@@ -71,11 +71,16 @@ export default function AnalyzePage() {
     setErr(null);
     setPdfName(file.name);
     try {
-      setAnalysis(await track(analyzePdf(file)));
+      setAnalysis(
+        await track(
+          analyzePdf(file, (pct) => setProgress(pct >= 100 ? null : pct))
+        )
+      );
     } catch (e2) {
       setErr((e2 as Error).message);
     } finally {
       setBusy(false);
+      setProgress(null);
     }
   }
 
