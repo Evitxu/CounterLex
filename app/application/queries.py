@@ -7,12 +7,15 @@ from pydantic import BaseModel
 from app.domain.entities import (
     CaseAnalysis,
     CounterfactualResult,
+    DebateResult,
+    DebateTurn,
     FactorContribution,
     JurisprudenceSearch,
     OutcomePrediction,
 )
 from app.domain.factors import FACTORS, GROUND_TRUTH
 from app.infrastructure.factor_extractor import FactorExtractor, detect_outcome
+from app.infrastructure.llm_client import LlmClient
 from app.infrastructure.outcome_model import OutcomeModel
 from app.infrastructure.repository import CorpusRepository
 from app.infrastructure.retrieval import PrecedentIndex
@@ -152,6 +155,101 @@ class CounterfactualHandler:
             f"del {round(base_p * 100)}% al {round(cf_p * 100)}% "
             f"({round(delta * 100):+d} puntos). De {len(precedents)} precedentes similares, "
             f"el {rate}% terminaron en condena."
+        )
+
+
+# --- multi-agent debate (LLM) --------------------------------------------
+class DebateQuery(BaseModel):
+    factors: dict[str, bool]
+    lang: str = "es"
+
+
+_DEBATE_SYS = {
+    "es": (
+        "Eres un simulador de debate jurídico sobre un caso penal español. A partir de "
+        "los factores del caso y los precedentes, redacta argumentos BREVES (2-3 frases "
+        "cada uno) para tres roles. Devuelve SOLO un objeto JSON con las claves exactas "
+        "'fiscal', 'defensa' y 'juez'. El fiscal argumenta a favor de la condena; la "
+        "defensa a favor de la absolución; el juez hace una síntesis ponderada y prudente. "
+        "No inventes hechos fuera de los factores dados."
+    ),
+    "en": (
+        "You simulate a legal debate about a Spanish criminal case. From the case factors "
+        "and precedents, write BRIEF arguments (2-3 sentences each) for three roles. Return "
+        "ONLY a JSON object with the exact keys 'fiscal', 'defensa', 'juez'. The 'fiscal' "
+        "(prosecutor) argues for conviction; 'defensa' (defence) for acquittal; 'juez' "
+        "(judge) gives a balanced, cautious synthesis. Do not invent facts beyond those given."
+    ),
+}
+
+
+class DebateHandler:
+    def __init__(self, repo: CorpusRepository, llm: LlmClient) -> None:
+        self._repo = repo
+        self._llm = llm
+
+    async def __call__(self, q: DebateQuery) -> DebateResult:
+        from app.core.config import get_settings
+
+        model = _load_model(self._repo)
+        prob = model.probability(q.factors)
+        precedents = PrecedentIndex(self._repo.all_cases()).query(
+            q.factors, get_settings().top_k_precedents
+        )
+        lang = "en" if q.lang == "en" else "es"
+        label = {f.key: (f.label_en if lang == "en" else f.label_es) for f in FACTORS}
+        present = [label[f.key] for f in FACTORS if q.factors.get(f.key)]
+        n = len(precedents)
+        conv = sum(1 for p in precedents if p.convicted)
+        rate = round(100 * conv / n) if n else 0
+        pct = round(prob * 100)
+
+        if lang == "en":
+            consensus = (
+                f"Model estimate: {pct}% probability of conviction. Of {n} similar "
+                f"precedents, {conv} ({rate}%) ended in conviction."
+            )
+            user = (
+                f"Present factors: {', '.join(present) or 'none'}. Model-estimated probability "
+                f"of conviction: {pct}%. Of {n} similar precedents, {conv} ({rate}%) ended in conviction."
+            )
+        else:
+            consensus = (
+                f"Estimación del modelo: {pct}% de probabilidad de condena. De {n} precedentes "
+                f"similares, {conv} ({rate}%) terminaron en condena."
+            )
+            user = (
+                f"Factores presentes: {', '.join(present) or 'ninguno'}. Probabilidad de condena "
+                f"estimada por el modelo: {pct}%. De {n} precedentes similares, {conv} ({rate}%) "
+                f"terminaron en condena."
+            )
+
+        turns: list[DebateTurn] = []
+        available = True
+        try:
+            raw = await self._llm.generate_json(_DEBATE_SYS[lang], user)
+            for role in ("fiscal", "defensa", "juez"):
+                val = raw.get(role)
+                if isinstance(val, list):  # small models often return a list of sentences
+                    text = " ".join(str(x) for x in val if x)
+                elif isinstance(val, str):
+                    text = val
+                else:
+                    text = ""
+                if text.strip():
+                    turns.append(DebateTurn(role=role, argument=text.strip()))
+            if not turns:
+                available = False
+        except Exception as exc:
+            log.info("debate_llm_unavailable", error=str(exc))
+            available = False
+
+        return DebateResult(
+            probability=round(prob, 4),
+            turns=turns,
+            consensus=consensus,
+            precedents=precedents,
+            llm_available=available,
         )
 
 

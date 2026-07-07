@@ -16,6 +16,8 @@ from app.application.queries import (
     AnalyzeCaseQuery,
     CounterfactualHandler,
     CounterfactualQuery,
+    DebateHandler,
+    DebateQuery,
     EvaluationHandler,
     EvaluationQuery,
     ListFactorsHandler,
@@ -55,6 +57,7 @@ def get_query_bus() -> QueryBus:
     bus.register(ListFactorsQuery, ListFactorsHandler())
     bus.register(AnalyzeCaseQuery, AnalyzeCaseHandler(repo, _extractor()))
     bus.register(SearchJurisprudenceQuery, SearchJurisprudenceHandler(repo, _extractor()))
+    bus.register(DebateQuery, DebateHandler(repo, build_llm_client()))
     bus.register(CounterfactualQuery, CounterfactualHandler(repo))
     bus.register(EvaluationQuery, EvaluationHandler(repo))
     return bus

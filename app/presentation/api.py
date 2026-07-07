@@ -11,17 +11,24 @@ from app.application.buses import CommandBus, QueryBus
 from app.core.config import get_settings
 from app.core.sanitize import sanitize_text
 from app.domain.entities import CounterfactualResult
+from app.infrastructure.ocr import ocr_pdf
 from app.infrastructure.pdf_extractor import extract_pdf_text
 from app.infrastructure.report import build_report_pdf
 from app.application.commands import GenerateCorpusCommand, TrainModelCommand
 from app.application.queries import (
     AnalyzeCaseQuery,
     CounterfactualQuery,
+    DebateQuery,
     EvaluationQuery,
     ListFactorsQuery,
     SearchJurisprudenceQuery,
 )
-from app.domain.entities import CaseAnalysis, CounterfactualResult, JurisprudenceSearch
+from app.domain.entities import (
+    CaseAnalysis,
+    CounterfactualResult,
+    DebateResult,
+    JurisprudenceSearch,
+)
 from app.presentation.dependencies import get_command_bus, get_query_bus
 
 router = APIRouter(prefix="/api/v1")
@@ -110,8 +117,17 @@ async def analyze_pdf(
         raise HTTPException(422, str(exc)) from exc
 
     clean = sanitize_text(raw_text)
+
+    # Scanned/image PDF (little embedded text) → try OCR (needs Tesseract).
+    if len(clean) < 40 and settings.ocr_enabled:
+        ocr_text = ocr_pdf(data, settings.ocr_max_pages, settings.ocr_languages, settings.tesseract_cmd)
+        if len(ocr_text) > len(clean):
+            clean = sanitize_text(ocr_text)
+
     if len(clean) < 10:
-        raise HTTPException(422, "Could not extract enough text (is it a scanned PDF?).")
+        raise HTTPException(
+            422, "Could not extract text. If it's a scanned PDF, install Tesseract for OCR."
+        )
 
     # Keep the beginning (facts/reasoning → factors) AND the end (the "fallo" →
     # verdict), since the operative part sits at the end of long judgments.
@@ -166,6 +182,22 @@ async def counterfactual(
     except ValueError as exc:
         raise HTTPException(422, str(exc)) from exc
     assert isinstance(result, CounterfactualResult)
+    return result
+
+
+# ---- multi-agent debate ----
+class DebateBody(BaseModel):
+    factors: dict[str, bool]
+    lang: str = "es"
+
+
+@router.post("/debate", response_model=DebateResult)
+async def debate(body: DebateBody, bus: QueryBus = Depends(get_query_bus)) -> DebateResult:
+    try:
+        result = await bus.ask(DebateQuery(factors=body.factors, lang=body.lang))
+    except ValueError as exc:
+        raise HTTPException(422, str(exc)) from exc
+    assert isinstance(result, DebateResult)
     return result
 
 

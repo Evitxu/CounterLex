@@ -44,6 +44,12 @@ class Settings(BaseSettings):
     max_pdf_bytes: int = Field(default=20 * 1024 * 1024, ge=1024)  # 20 MB
     max_pdf_pages: int = Field(default=500, ge=1)
 
+    # OCR fallback for scanned (image) PDFs. Requires Tesseract installed.
+    ocr_enabled: bool = True
+    ocr_max_pages: int = Field(default=15, ge=1)   # OCR is slow; cap pages
+    ocr_languages: str = "spa+eng"
+    tesseract_cmd: str | None = None               # full path if not on PATH
+
     frontend_origin: str = "http://localhost:3000"
 
     # Auto-generate + train on startup if the corpus is empty (nice for demos).

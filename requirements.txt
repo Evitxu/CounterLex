@@ -8,3 +8,6 @@ scikit-learn>=1.4
 python-multipart>=0.0.12
 pypdf>=5.0
 fpdf2>=2.7
+pypdfium2>=4.30
+pytesseract>=0.3.13
+pillow>=10.4

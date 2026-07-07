@@ -51,6 +51,19 @@ class CaseAnalysis(BaseModel):
     detected_outcome: bool | None = None
 
 
+class DebateTurn(BaseModel):
+    role: str  # "fiscal" | "defensa" | "juez"
+    argument: str
+
+
+class DebateResult(BaseModel):
+    probability: float
+    turns: list[DebateTurn]
+    consensus: str
+    precedents: list[PrecedentRef]
+    llm_available: bool  # False when no LLM (model/key) is reachable
+
+
 class JurisprudenceSearch(BaseModel):
     query_factors: dict[str, bool]
     extraction_source: str  # "llm" or "keyword"
