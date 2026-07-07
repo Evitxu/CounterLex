@@ -3,6 +3,10 @@
 Uses fpdf2 (pure Python). Core fonts are latin-1; `_l()` coerces text so Spanish
 accents/guillemets render and any stray symbol degrades gracefully instead of
 crashing. Kept dependency-light (no embedded TTF).
+
+Every `multi_cell` uses new_x=LMARGIN, new_y=NEXT so text flows down the left
+margin (fpdf2's default leaves the cursor at the right edge, which pushes all
+body text off-page).
 """
 
 from __future__ import annotations
@@ -60,6 +64,7 @@ def _l(s: str) -> str:
 
 def build_report_pdf(cf: CounterfactualResult, factors: dict[str, bool], lang: str, generated_at: str) -> bytes:
     from fpdf import FPDF
+    from fpdf.enums import XPos, YPos
 
     s = _STR.get(lang, _STR["es"])
     label = {f.key: (f.label_en if lang == "en" else f.label_es) for f in FACTORS}
@@ -69,27 +74,45 @@ def build_report_pdf(cf: CounterfactualResult, factors: dict[str, bool], lang: s
     pdf.add_page()
     epw = pdf.w - pdf.l_margin - pdf.r_margin
 
-    def h1(txt: str) -> None:
-        pdf.set_font("Helvetica", "B", 18)
-        pdf.multi_cell(epw, 9, _l(txt))
+    def _cell(txt: str, h: float) -> None:
+        pdf.multi_cell(epw, h, _l(txt), new_x=XPos.LMARGIN, new_y=YPos.NEXT)
+
+    def title(txt: str) -> None:
+        pdf.set_font("Helvetica", "B", 20)
+        pdf.set_text_color(20, 22, 28)
+        _cell(txt, 10)
+        pdf.set_text_color(0, 0, 0)
+
+    def subtitle(txt: str) -> None:
+        pdf.set_font("Helvetica", "", 10)
+        pdf.set_text_color(120, 120, 120)
+        _cell(txt, 5)
+        pdf.set_text_color(0, 0, 0)
+        # rule under the header
+        y = pdf.get_y() + 1
+        pdf.set_draw_color(210, 215, 224)
+        pdf.line(pdf.l_margin, y, pdf.w - pdf.r_margin, y)
+        pdf.ln(4)
 
     def h2(txt: str) -> None:
-        pdf.ln(3)
+        pdf.ln(2)
         pdf.set_font("Helvetica", "B", 13)
-        pdf.multi_cell(epw, 7, _l(txt))
+        pdf.set_text_color(48, 80, 176)
+        _cell(txt, 7)
+        pdf.set_text_color(0, 0, 0)
 
     def body(txt: str) -> None:
         pdf.set_font("Helvetica", "", 11)
-        pdf.multi_cell(epw, 6, _l(txt))
+        _cell(txt, 6)
 
     def small(txt: str) -> None:
         pdf.set_font("Helvetica", "", 9)
         pdf.set_text_color(120, 120, 120)
-        pdf.multi_cell(epw, 5, _l(txt))
+        _cell(txt, 5)
         pdf.set_text_color(0, 0, 0)
 
-    h1(s["title"])
-    small(f"{s['subtitle']}  -  {s['generated']}: {generated_at}")
+    title(s["title"])
+    subtitle(f"{s['subtitle']}  -  {s['generated']}: {generated_at}")
 
     # Case factors
     h2(s["caseFactors"])
@@ -99,9 +122,12 @@ def build_report_pdf(cf: CounterfactualResult, factors: dict[str, bool], lang: s
     # Probability + top contributions
     h2(f"{s['prob']}: {round(cf.base.probability * 100)}%")
     top = [c for c in cf.base.contributions if c.present][:6]
-    for c in top:
-        sign = "+" if c.contribution >= 0 else ""
-        body(f"  - {label.get(c.key, c.key)}: {sign}{round(c.contribution, 2)} (log-odds)")
+    if top:
+        for c in top:
+            sign = "+" if c.contribution >= 0 else ""
+            body(f"  - {label.get(c.key, c.key)}: {sign}{round(c.contribution, 2)} (log-odds)")
+    else:
+        body(s["none"])
 
     # Counterfactual (only if something changed)
     if cf.changed:
