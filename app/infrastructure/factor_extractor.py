@@ -60,16 +60,29 @@ _LETTER_SPACED = re.compile(r"(?:\w ){2,}\w")
 def detect_outcome(text: str) -> bool | None:
     """Best-effort detection of the court's decision from the ruling text.
 
-    Returns True (conviction), False (acquittal), or None if it can't be told
-    (no clear verb, or both appear — e.g. mixed counts). Keyword-based,
-    accent-insensitive, and robust to letter-spaced text (common in the "FALLO"
-    section of scanned/typeset judgments). Works without an LLM.
+    Returns True (conviction), False (acquittal), or None if it can't be told.
+
+    A full judgment mentions *both* conviction and acquittal all over the place
+    (reasoning, cited precedents, and the dissenting "votos particulares" after
+    the ruling). So we don't scan the whole document: we restrict to the
+    **majority opinion** (before any "voto particular") and read the verdict from
+    the operative **FALLO** heading onward. Accent-insensitive and robust to
+    letter-spaced text ("F A L L O", "C O N D E N A M O S"). Works without an LLM.
     """
     hay = _norm(text)
     # Collapse letter-spaced runs so "c o n d e n o" -> "condeno", "f a l l o" -> "fallo".
     hay = _LETTER_SPACED.sub(lambda m: m.group(0).replace(" ", ""), hay)
-    has_conv = any(term in hay for term in _CONVICT_TERMS)
-    has_acq = any(term in hay for term in _ACQUIT_TERMS)
+
+    # Drop dissenting/concurring opinions that follow the ruling.
+    cut = hay.find("voto particular")
+    region = hay[:cut] if cut != -1 else hay
+
+    # Focus on the operative ruling: from the last FALLO heading onward.
+    idx = region.rfind("fallo")
+    scope = region[idx:] if idx != -1 else region
+
+    has_conv = any(term in scope for term in _CONVICT_TERMS)
+    has_acq = any(term in scope for term in _ACQUIT_TERMS)
     if has_conv and not has_acq:
         return True
     if has_acq and not has_conv:
