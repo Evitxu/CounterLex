@@ -45,18 +45,29 @@ def _keyword_extract(text: str) -> dict[str, bool]:
     return {k: any(kw in hay for kw in _KEYWORDS.get(k, [])) for k in FACTOR_KEYS}
 
 
-_CONVICT_TERMS = ["condeno", "condena", "condenamos", "condenar", "condenatorio"]
-_ACQUIT_TERMS = ["absuelvo", "absuelve", "absolver", "absolucion", "absolutorio"]
+_CONVICT_TERMS = [
+    "condeno", "condena", "condenamos", "condenar",
+    "condenado", "condenados", "condenatori",
+]
+_ACQUIT_TERMS = [
+    "absuelvo", "absuelve", "absuelto", "absuelta", "absueltos",
+    "absolver", "absolucion", "absolutori",
+]
+# Matches letter-spaced words like "F A L L O" or "C O N D E N A M O S".
+_LETTER_SPACED = re.compile(r"(?:\w ){2,}\w")
 
 
 def detect_outcome(text: str) -> bool | None:
     """Best-effort detection of the court's decision from the ruling text.
 
     Returns True (conviction), False (acquittal), or None if it can't be told
-    (no clear verb, or both appear — e.g. mixed counts). Keyword-based and
-    accent-insensitive; works without an LLM.
+    (no clear verb, or both appear — e.g. mixed counts). Keyword-based,
+    accent-insensitive, and robust to letter-spaced text (common in the "FALLO"
+    section of scanned/typeset judgments). Works without an LLM.
     """
     hay = _norm(text)
+    # Collapse letter-spaced runs so "c o n d e n o" -> "condeno", "f a l l o" -> "fallo".
+    hay = _LETTER_SPACED.sub(lambda m: m.group(0).replace(" ", ""), hay)
     has_conv = any(term in hay for term in _CONVICT_TERMS)
     has_acq = any(term in hay for term in _ACQUIT_TERMS)
     if has_conv and not has_acq:

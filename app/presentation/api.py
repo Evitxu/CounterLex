@@ -145,7 +145,7 @@ async def analyze_pdf(
     else:
         text = clean
 
-    result = await bus.ask(AnalyzeCaseQuery(text=text))
+    result = await bus.ask(AnalyzeCaseQuery(text=text, full_text=clean))
     assert isinstance(result, CaseAnalysis)
     return result
 

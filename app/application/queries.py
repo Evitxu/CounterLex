@@ -67,6 +67,9 @@ class ListFactorsHandler:
 # --- analyze a free-text case --------------------------------------------
 class AnalyzeCaseQuery(BaseModel):
     text: str
+    # Optional full document (used only for verdict detection). For long PDFs the
+    # fallo can sit past the truncated analysis window, so we scan the whole text.
+    full_text: str | None = None
 
 
 class AnalyzeCaseHandler:
@@ -88,7 +91,7 @@ class AnalyzeCaseHandler:
             prediction=prediction,
             precedents=precedents,
             extraction_source=source,
-            detected_outcome=detect_outcome(q.text),
+            detected_outcome=detect_outcome(q.full_text or q.text),
         )
 
 
