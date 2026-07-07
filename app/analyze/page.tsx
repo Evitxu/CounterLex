@@ -108,6 +108,27 @@ export default function AnalyzePage() {
   const agree = verdict !== null && modelConvicts === verdict;
   const opinionColor = verdict === null ? "#c7ccd6" : agree ? "#0a7d28" : "#f0a500";
 
+  // Reasons for the (dis)agreement: which present factors push in the model's
+  // chosen direction, and which pull the other way. `influences` is already the
+  // per-present-factor effect on P(conviction), sorted by |impact|.
+  const EPS = 0.005;
+  const drivers = influences
+    .filter((i) => (modelConvicts ? i.delta > EPS : i.delta < -EPS))
+    .slice(0, 4);
+  const opposers = influences
+    .filter((i) => (modelConvicts ? i.delta < -EPS : i.delta > EPS))
+    .slice(0, 2);
+  const reasonSummary =
+    verdict === null
+      ? ""
+      : agree
+      ? modelConvicts
+        ? t("reasonAgreeConvict")
+        : t("reasonAgreeAcquit")
+      : verdict
+      ? t("reasonDisagreeCourtConvict")
+      : t("reasonDisagreeCourtAcquit");
+
   function openInSimulator() {
     if (!analysis) return;
     sessionStorage.setItem("counterlex_prefill", JSON.stringify(analysis.factors));
@@ -186,6 +207,61 @@ export default function AnalyzePage() {
                 <p style={{ fontWeight: 700, color: agree ? "#0a7d28" : "#b8860b", margin: "4px 0" }}>
                   {agree ? t("opinionAgree") : t("opinionDisagree")}
                 </p>
+
+                <div style={{ marginTop: 6, paddingTop: 10, borderTop: "1px solid #eef0f4" }}>
+                  <div style={{ fontSize: 13, fontWeight: 700, color: "#444", marginBottom: 4 }}>
+                    {t("opinionWhyTitle")}
+                  </div>
+                  <p style={{ margin: "0 0 8px", fontSize: 14, color: "#444" }}>{reasonSummary}</p>
+                  {drivers.length > 0 ? (
+                    <>
+                      <div style={{ fontSize: 12, color: "#777", marginBottom: 4 }}>
+                        {modelConvicts ? t("reasonDriversConvict") : t("reasonDriversAcquit")}
+                      </div>
+                      <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+                        {drivers.map((d) => {
+                          const pp = Math.round(d.delta * 100);
+                          return (
+                            <span
+                              key={d.key}
+                              style={{ fontSize: 12, background: "#f3f5fa", padding: "3px 8px", borderRadius: 6 }}
+                            >
+                              {labelFor(d.key)}{" "}
+                              <strong style={{ color: pp >= 0 ? "#c0341d" : "#0a7d28" }}>
+                                {pp > 0 ? "+" : ""}
+                                {pp}%
+                              </strong>
+                            </span>
+                          );
+                        })}
+                      </div>
+                    </>
+                  ) : (
+                    <p style={{ margin: 0, fontSize: 13, color: "#888" }}>{t("reasonBaseRate")}</p>
+                  )}
+                  {opposers.length > 0 && (
+                    <div style={{ marginTop: 8 }}>
+                      <div style={{ fontSize: 12, color: "#777", marginBottom: 4 }}>{t("reasonOpposing")}</div>
+                      <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+                        {opposers.map((d) => {
+                          const pp = Math.round(d.delta * 100);
+                          return (
+                            <span
+                              key={d.key}
+                              style={{ fontSize: 12, background: "#f7f7f9", padding: "3px 8px", borderRadius: 6 }}
+                            >
+                              {labelFor(d.key)}{" "}
+                              <strong style={{ color: pp >= 0 ? "#c0341d" : "#0a7d28" }}>
+                                {pp > 0 ? "+" : ""}
+                                {pp}%
+                              </strong>
+                            </span>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
+                </div>
               </>
             )}
             <p style={{ fontSize: 12, color: "#999", margin: "6px 0 0" }}>{t("opinionNote")}</p>
