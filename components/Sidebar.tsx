@@ -14,11 +14,11 @@ interface Item {
 const ITEMS: Item[] = [
   { href: "/", icon: "⚖", key: "nav.counterfactual" },
   { href: "/analyze", icon: "📄", key: "nav.analyze" },
+  { href: "/reports", icon: "📑", key: "nav.reports" },
   { href: "/search", icon: "🔍", key: "nav.search" },
   { href: "/compare", icon: "🆚", key: "nav.compare" },
   { href: "/debate", icon: "🗣️", key: "nav.debate" },
   { href: "/detective", icon: "🕵️", key: "nav.detective" },
-  { href: "/reports", icon: "📑", key: "nav.reports" },
 ];
 
 export default function Sidebar() {
