@@ -16,6 +16,7 @@ const ITEMS: Item[] = [
   { href: "/analyze", icon: "📄", key: "nav.analyze" },
   { href: "/search", icon: "🔍", key: "nav.search" },
   { href: "/compare", icon: "🆚", key: "nav.compare" },
+  { href: "/debate", icon: "🗣️", key: "nav.debate" },
   { href: "/reports", icon: "📑", key: "nav.reports" },
 ];
 

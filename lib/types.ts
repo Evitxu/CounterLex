@@ -41,6 +41,19 @@ export interface CaseAnalysis {
   detected_outcome: boolean | null; // true=conviction, false=acquittal, null=unknown
 }
 
+export interface DebateTurn {
+  role: string; // "fiscal" | "defensa" | "juez"
+  argument: string;
+}
+
+export interface DebateResult {
+  probability: number;
+  turns: DebateTurn[];
+  consensus: string;
+  precedents: PrecedentRef[];
+  llm_available: boolean;
+}
+
 export interface JurisprudenceSearch {
   query_factors: Factors;
   extraction_source: string;

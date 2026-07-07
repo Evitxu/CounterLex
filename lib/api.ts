@@ -1,6 +1,7 @@
 import type {
   CaseAnalysis,
   CounterfactualResult,
+  DebateResult,
   Evaluation,
   Factor,
   Factors,
@@ -70,6 +71,14 @@ export function searchJurisprudence(text: string, topK = 10): Promise<Jurisprude
     headers: jsonHeaders,
     body: JSON.stringify({ text, top_k: topK }),
   }).then(json<JurisprudenceSearch>);
+}
+
+export function debate(factors: Factors, lang: string): Promise<DebateResult> {
+  return fetch(`${API_BASE}/debate`, {
+    method: "POST",
+    headers: jsonHeaders,
+    body: JSON.stringify({ factors, lang }),
+  }).then(json<DebateResult>);
 }
 
 export function counterfactual(
