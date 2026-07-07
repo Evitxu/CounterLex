@@ -120,7 +120,13 @@ async def analyze_pdf(
 
     # Scanned/image PDF (little embedded text) → try OCR (needs Tesseract).
     if len(clean) < 40 and settings.ocr_enabled:
-        ocr_text = ocr_pdf(data, settings.ocr_max_pages, settings.ocr_languages, settings.tesseract_cmd)
+        ocr_text = ocr_pdf(
+            data,
+            settings.ocr_max_pages,
+            settings.ocr_languages,
+            settings.tesseract_cmd,
+            settings.tessdata_dir,
+        )
         if len(ocr_text) > len(clean):
             clean = sanitize_text(ocr_text)
 

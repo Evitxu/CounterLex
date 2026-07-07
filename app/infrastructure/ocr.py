@@ -13,7 +13,13 @@ from app.core.logging import get_logger
 log = get_logger(__name__)
 
 
-def ocr_pdf(data: bytes, max_pages: int, languages: str, tesseract_cmd: str | None) -> str:
+def ocr_pdf(
+    data: bytes,
+    max_pages: int,
+    languages: str,
+    tesseract_cmd: str | None,
+    tessdata_dir: str | None = None,
+) -> str:
     try:
         import pypdfium2 as pdfium
         import pytesseract
@@ -23,6 +29,8 @@ def ocr_pdf(data: bytes, max_pages: int, languages: str, tesseract_cmd: str | No
 
     if tesseract_cmd:
         pytesseract.pytesseract.tesseract_cmd = tesseract_cmd
+    # A custom tessdata folder lets us ship language data without admin rights.
+    config = f"--tessdata-dir {tessdata_dir}" if tessdata_dir else ""
 
     try:
         pdf = pdfium.PdfDocument(data)
@@ -37,7 +45,7 @@ def ocr_pdf(data: bytes, max_pages: int, languages: str, tesseract_cmd: str | No
             page = pdf[i]
             bitmap = page.render(scale=2.0)  # ~150 DPI, good enough for OCR
             image = bitmap.to_pil()
-            parts.append(pytesseract.image_to_string(image, lang=languages))
+            parts.append(pytesseract.image_to_string(image, lang=languages, config=config))
         except Exception as exc:  # tesseract missing / page error → skip
             log.info("ocr_page_failed", page=i, error=str(exc))
             continue

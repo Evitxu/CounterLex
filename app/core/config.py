@@ -49,6 +49,7 @@ class Settings(BaseSettings):
     ocr_max_pages: int = Field(default=15, ge=1)   # OCR is slow; cap pages
     ocr_languages: str = "spa+eng"
     tesseract_cmd: str | None = None               # full path if not on PATH
+    tessdata_dir: str | None = None                # folder with *.traineddata (if not default)
 
     frontend_origin: str = "http://localhost:3000"
 
