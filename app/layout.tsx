@@ -22,6 +22,18 @@ export default function RootLayout({ children }: { children: ReactNode }) {
               <Sidebar />
               <main className="cl-content">{children}</main>
             </div>
+            <footer
+              style={{
+                textAlign: "center",
+                color: "#9aa0ad",
+                fontSize: 12,
+                padding: "20px",
+                borderTop: "1px solid #e2e4ea",
+                marginTop: 8,
+              }}
+            >
+              © {new Date().getFullYear()} CounterLex
+            </footer>
           </BusyProvider>
         </LanguageProvider>
       </body>
