@@ -45,16 +45,15 @@ def _keyword_extract(text: str) -> dict[str, bool]:
     return {k: any(kw in hay for kw in _KEYWORDS.get(k, [])) for k in FACTOR_KEYS}
 
 
-_CONVICT_TERMS = [
-    "condeno", "condena", "condenamos", "condenar",
-    "condenado", "condenados", "condenatori",
-]
-_ACQUIT_TERMS = [
-    "absuelvo", "absuelve", "absuelto", "absuelta", "absueltos",
-    "absolver", "absolucion", "absolutori",
-]
+_CONVICT_STEMS = ["conden"]  # condena, condeno, condenamos, condenar, condenado, condenatorio
+_ACQUIT_STEMS = ["absuel", "absolv", "absoluci", "absolutori"]  # absuelto, absolver/absolvemos, absolución
 # Matches letter-spaced words like "F A L L O" or "C O N D E N A M O S".
 _LETTER_SPACED = re.compile(r"(?:\w ){2,}\w")
+_SPACED_FALLO = re.compile(r"f a l l o")
+
+
+def _collapse(s: str) -> str:
+    return _LETTER_SPACED.sub(lambda m: m.group(0).replace(" ", ""), s)
 
 
 def detect_outcome(text: str) -> bool | None:
@@ -62,30 +61,44 @@ def detect_outcome(text: str) -> bool | None:
 
     Returns True (conviction), False (acquittal), or None if it can't be told.
 
-    A full judgment mentions *both* conviction and acquittal all over the place
-    (reasoning, cited precedents, and the dissenting "votos particulares" after
-    the ruling). So we don't scan the whole document: we restrict to the
-    **majority opinion** (before any "voto particular") and read the verdict from
-    the operative **FALLO** heading onward. Accent-insensitive and robust to
-    letter-spaced text ("F A L L O", "C O N D E N A M O S"). Works without an LLM.
+    A full judgment mentions *both* conviction and acquittal everywhere (reasoning,
+    cited precedents, dissenting votes), and the operative FALLO can itself be
+    mixed ("condenamos… Le absolvemos del resto…"). So we (1) anchor on the
+    operative ruling — the letter-spaced "F A L L O" heading, else "parte
+    dispositiva" / "ha decidido" / the last plain "fallo" — read a bounded window
+    up to any following "voto particular", and (2) treat conviction as the
+    headline of a mixed verdict (a partial acquittal does not erase a conviction).
+    Accent-insensitive and robust to letter-spacing. Works without an LLM.
     """
-    hay = _norm(text)
-    # Collapse letter-spaced runs so "c o n d e n o" -> "condeno", "f a l l o" -> "fallo".
-    hay = _LETTER_SPACED.sub(lambda m: m.group(0).replace(" ", ""), hay)
+    norm = _norm(text)
 
-    # Drop dissenting/concurring opinions that follow the ruling.
-    cut = hay.find("voto particular")
-    region = hay[:cut] if cut != -1 else hay
+    # 1) Locate the operative ruling.
+    m = _SPACED_FALLO.search(norm)  # distinctive letter-spaced heading
+    start = m.start() if m else -1
+    if start == -1:
+        norm = _collapse(norm)
+        for marker in ("parte dispositiva", "ha decidido"):
+            start = norm.find(marker)
+            if start != -1:
+                break
+        if start == -1:
+            start = norm.rfind("fallo")
 
-    # Focus on the operative ruling: from the last FALLO heading onward.
-    idx = region.rfind("fallo")
-    scope = region[idx:] if idx != -1 else region
+    # 2) Build the scope: from the anchor to the next dissenting vote (or a cap).
+    if start == -1:
+        scope = _collapse(norm)  # short pasted text with no heading → whole text
+    else:
+        end = start + 2500
+        vp = norm.find("voto particular", start)
+        if vp != -1:
+            end = min(end, vp)
+        scope = _collapse(norm[start:end])
 
-    has_conv = any(term in scope for term in _CONVICT_TERMS)
-    has_acq = any(term in scope for term in _ACQUIT_TERMS)
-    if has_conv and not has_acq:
+    has_conv = any(s in scope for s in _CONVICT_STEMS)
+    has_acq = any(s in scope for s in _ACQUIT_STEMS)
+    if has_conv:  # conviction is the headline, even with partial acquittals
         return True
-    if has_acq and not has_conv:
+    if has_acq:
         return False
     return None
 
