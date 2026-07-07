@@ -9,6 +9,7 @@ from pydantic import BaseModel, Field, field_validator
 
 from app.application.buses import CommandBus, QueryBus
 from app.core.config import get_settings
+from app.core.logging import get_logger
 from app.core.sanitize import sanitize_text
 from app.domain.entities import CounterfactualResult
 from app.infrastructure.ocr import ocr_pdf
@@ -32,6 +33,7 @@ from app.domain.entities import (
 from app.presentation.dependencies import get_command_bus, get_query_bus
 
 router = APIRouter(prefix="/api/v1")
+_log = get_logger(__name__)
 
 
 # ---- factor catalog ----
@@ -117,6 +119,8 @@ async def analyze_pdf(
         raise HTTPException(422, str(exc)) from exc
 
     clean = sanitize_text(raw_text)
+    pypdf_chars = len(clean)
+    ocr_used = False
 
     # Scanned/image PDF (little embedded text) → try OCR (needs Tesseract).
     if len(clean) < 40 and settings.ocr_enabled:
@@ -129,11 +133,19 @@ async def analyze_pdf(
         )
         if len(ocr_text) > len(clean):
             clean = sanitize_text(ocr_text)
+            ocr_used = True
 
     if len(clean) < 10:
         raise HTTPException(
             422, "Could not extract text. If it's a scanned PDF, install Tesseract for OCR."
         )
+
+    _low = clean.lower()
+    _log.info(
+        "pdf_upload file=%r size=%d pypdf_chars=%d ocr_used=%s final_chars=%d has_conden=%s has_absuel=%s",
+        file.filename, len(data), pypdf_chars, ocr_used, len(clean),
+        "conden" in _low, ("absuel" in _low or "absolu" in _low),
+    )
 
     # Keep the beginning (facts/reasoning → factors) AND the end (the "fallo" →
     # verdict), since the operative part sits at the end of long judgments.
