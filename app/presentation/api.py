@@ -2,9 +2,10 @@
 
 from __future__ import annotations
 
+import hmac
 from datetime import datetime, timezone
 
-from fastapi import APIRouter, Depends, File, HTTPException, Response, UploadFile
+from fastapi import APIRouter, Depends, File, Header, HTTPException, Response, UploadFile
 from pydantic import BaseModel, Field, field_validator
 
 from app.application.buses import CommandBus, QueryBus
@@ -36,6 +37,15 @@ router = APIRouter(prefix="/api/v1")
 _log = get_logger(__name__)
 
 
+def require_admin(x_admin_key: str | None = Header(default=None)) -> None:
+    """Guard for state-mutating admin endpoints. No-op unless `admin_api_key` is
+    configured; when it is, requires a matching `X-Admin-Key` header (compared in
+    constant time to avoid a timing side-channel)."""
+    key = get_settings().admin_api_key
+    if key and not (x_admin_key and hmac.compare_digest(x_admin_key, key)):
+        raise HTTPException(status_code=401, detail="Invalid or missing admin key.")
+
+
 # ---- factor catalog ----
 @router.get("/factors")
 async def list_factors(bus: QueryBus = Depends(get_query_bus)):
@@ -50,14 +60,21 @@ class GenerateCorpusBody(BaseModel):
 
 
 @router.post("/corpus/generate")
-async def generate_corpus(body: GenerateCorpusBody, bus: CommandBus = Depends(get_command_bus)):
+async def generate_corpus(
+    body: GenerateCorpusBody,
+    bus: CommandBus = Depends(get_command_bus),
+    _: None = Depends(require_admin),
+):
     return await bus.dispatch(
         GenerateCorpusCommand(size=body.size, seed=body.seed, reset=body.reset)
     )
 
 
 @router.post("/model/train")
-async def train_model(bus: CommandBus = Depends(get_command_bus)):
+async def train_model(
+    bus: CommandBus = Depends(get_command_bus),
+    _: None = Depends(require_admin),
+):
     try:
         return await bus.dispatch(TrainModelCommand())
     except ValueError as exc:

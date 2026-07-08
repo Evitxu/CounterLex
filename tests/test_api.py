@@ -132,6 +132,51 @@ def test_report_returns_pdf(client):
     assert r.content[:4] == b"%PDF"
 
 
+def test_admin_endpoints_open_when_no_key_configured(client):
+    # Default demo config sets no ADMIN_API_KEY → mutating endpoints stay open.
+    assert client.post("/api/v1/model/train").status_code == 200
+    assert client.post(
+        "/api/v1/corpus/generate", json={"size": 50, "seed": 1, "reset": True}
+    ).status_code == 200
+
+
+def test_admin_endpoints_require_key_when_configured(secured_client):
+    # Without the header → 401.
+    assert secured_client.post("/api/v1/model/train").status_code == 401
+    assert secured_client.post(
+        "/api/v1/corpus/generate", json={"size": 50, "seed": 1, "reset": True}
+    ).status_code == 401
+    # Wrong key → 401.
+    assert secured_client.post(
+        "/api/v1/model/train", headers={"X-Admin-Key": "wrong"}
+    ).status_code == 401
+    # Correct key → allowed.
+    ok = {"X-Admin-Key": "s3cret-key"}
+    assert secured_client.post(
+        "/api/v1/corpus/generate", json={"size": 50, "seed": 1, "reset": True}, headers=ok
+    ).status_code == 200
+    assert secured_client.post("/api/v1/model/train", headers=ok).status_code == 200
+
+
+def test_read_endpoints_are_never_gated_by_admin_key(secured_client):
+    # The guard must only touch the mutating endpoints, not normal reads.
+    assert secured_client.get("/api/v1/factors").status_code == 200
+    assert secured_client.post(
+        "/api/v1/analyze", json={"text": "Se halló el arma y un testigo presencial."}
+    ).status_code == 200
+
+
+def test_analyze_pdf_rejected_over_size_limit(tiny_pdf_client):
+    # Body well over the 2 KB cap → 413 from the upload middleware.
+    oversized = b"%PDF-1.4\n" + b"x" * 5000
+    r = tiny_pdf_client.post(
+        "/api/v1/analyze/pdf",
+        files={"file": ("big.pdf", oversized, "application/pdf")},
+    )
+    assert r.status_code == 413
+    assert "MB" in r.json()["detail"]
+
+
 def test_debate_degrades_gracefully_without_llm(client):
     factors = {k: False for k in FACTOR_KEYS}
     factors["confession"] = True

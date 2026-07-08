@@ -1,7 +1,8 @@
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 
 from app.application.commands import GenerateCorpusCommand, TrainModelCommand
 from app.core.config import get_settings
@@ -36,6 +37,22 @@ def create_app() -> FastAPI:
     )
     # FRONTEND_ORIGIN may be a comma-separated list (e.g. the Railway HTTPS URL
     # plus http://localhost:3000 for local dev).
+    # Reject oversized PDF uploads by their declared Content-Length BEFORE the
+    # body is buffered. This runs at the ASGI layer (earlier than route
+    # dependencies, which only fire after Starlette has read the body), so a
+    # huge upload is refused up front. The handler keeps a post-read size check
+    # as defence in depth (for chunked requests with no Content-Length).
+    @app.middleware("http")
+    async def limit_pdf_upload(request: Request, call_next):
+        if request.url.path.endswith("/analyze/pdf"):
+            declared = request.headers.get("content-length")
+            max_bytes = get_settings().max_pdf_bytes
+            if declared and declared.isdigit() and int(declared) > max_bytes:
+                mb = max_bytes // (1024 * 1024)
+                return JSONResponse(status_code=413, content={"detail": f"PDF exceeds {mb} MB."})
+        return await call_next(request)
+
+    # CORS added last → outermost, so even the 413 above carries CORS headers.
     origins = [o.strip() for o in settings.frontend_origin.split(",") if o.strip()]
     app.add_middleware(
         CORSMiddleware,

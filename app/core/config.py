@@ -53,6 +53,12 @@ class Settings(BaseSettings):
 
     frontend_origin: str = "http://localhost:3000"
 
+    # Optional shared secret protecting the state-mutating admin endpoints
+    # (/corpus/generate, /model/train). If unset (default), they stay open so the
+    # local demo and startup bootstrap work with zero config; set it in production
+    # to require an `X-Admin-Key` header.
+    admin_api_key: str | None = None
+
     # Auto-generate + train on startup if the corpus is empty (nice for demos).
     bootstrap_on_startup: bool = True
 

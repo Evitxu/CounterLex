@@ -41,18 +41,19 @@ def trained_repo(repo: CorpusRepository, small_corpus: list[Case]) -> CorpusRepo
     return repo
 
 
-@pytest.fixture()
-def client(tmp_path, monkeypatch):
+def _client_ctx(tmp_path, monkeypatch, extra_env: dict[str, str]):
     """A FastAPI TestClient wired to an isolated DB, offline settings, and a
-    freshly bootstrapped corpus+model (via the app lifespan)."""
-    db_path = str(tmp_path / "api.db")
-    monkeypatch.setenv("SQLITE_PATH", db_path)
+    freshly bootstrapped corpus+model (via the app lifespan). `extra_env` lets a
+    fixture override settings (e.g. an admin key or a tiny upload limit)."""
+    monkeypatch.setenv("SQLITE_PATH", str(tmp_path / "api.db"))
     monkeypatch.setenv("ALLOW_EXTRACTOR_FALLBACK", "true")
     monkeypatch.setenv("LLM_PROVIDER", "ollama")          # unreachable in tests → fallback
     monkeypatch.setenv("OLLAMA_BASE_URL", "http://127.0.0.1:1")  # force connection failure fast
     monkeypatch.setenv("OCR_ENABLED", "false")
     monkeypatch.setenv("DEFAULT_CORPUS_SIZE", "200")
     monkeypatch.setenv("BOOTSTRAP_ON_STARTUP", "true")
+    for k, v in extra_env.items():
+        monkeypatch.setenv(k, v)
 
     # get_settings() and the composition-root singletons are lru_cached; rebuild
     # the modules so they pick up the patched environment for this test only.
@@ -73,3 +74,20 @@ def client(tmp_path, monkeypatch):
     config_mod.get_settings.cache_clear()
     for fn in (deps.get_repo, deps._extractor, deps.get_command_bus, deps.get_query_bus):
         fn.cache_clear()
+
+
+@pytest.fixture()
+def client(tmp_path, monkeypatch):
+    yield from _client_ctx(tmp_path, monkeypatch, {})
+
+
+@pytest.fixture()
+def secured_client(tmp_path, monkeypatch):
+    """Like `client`, but with the admin endpoints protected by a shared key."""
+    yield from _client_ctx(tmp_path, monkeypatch, {"ADMIN_API_KEY": "s3cret-key"})
+
+
+@pytest.fixture()
+def tiny_pdf_client(tmp_path, monkeypatch):
+    """Like `client`, but with a 2 KB PDF upload cap (to test the size guard)."""
+    yield from _client_ctx(tmp_path, monkeypatch, {"MAX_PDF_BYTES": "2048"})
