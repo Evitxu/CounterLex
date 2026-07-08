@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from pydantic import BaseModel
 
+from app.core.logging import get_logger
 from app.domain.entities import (
     CaseAnalysis,
     CounterfactualResult,
@@ -19,6 +20,8 @@ from app.infrastructure.llm_client import LlmClient
 from app.infrastructure.outcome_model import OutcomeModel
 from app.infrastructure.repository import CorpusRepository
 from app.infrastructure.retrieval import PrecedentIndex
+
+log = get_logger(__name__)
 
 _LABELS = {f.key: f.label_es for f in FACTORS}
 
@@ -244,7 +247,7 @@ class DebateHandler:
             if not turns:
                 available = False
         except Exception as exc:
-            log.info("debate_llm_unavailable", error=str(exc))
+            log.info("debate_llm_unavailable: %s", exc)
             available = False
 
         return DebateResult(
