@@ -1,0 +1,15 @@
+# The `main` branch holds DOCUMENTATION ONLY. The code lives on the `backend`
+# and `frontend` branches (one branch per component). Ignore any leftover local
+# code folders so they can never be accidentally committed onto `main`.
+/backend/
+/frontend/
+/docs/
+
+# Env / secrets — never commit
+.env
+.env.*
+*.env
+
+# General
+.DS_Store
+*.log
