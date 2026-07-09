@@ -61,7 +61,14 @@ def _client_ctx(tmp_path, monkeypatch, extra_env: dict[str, str]):
     config_mod.get_settings.cache_clear()
 
     from app.presentation import dependencies as deps
-    for fn in (deps.get_repo, deps._extractor, deps.get_command_bus, deps.get_query_bus):
+    for fn in (
+        deps.get_repo,
+        deps.get_contact_repo,
+        deps.get_mailer,
+        deps._extractor,
+        deps.get_command_bus,
+        deps.get_query_bus,
+    ):
         fn.cache_clear()
 
     from app import main as main_mod
@@ -72,7 +79,14 @@ def _client_ctx(tmp_path, monkeypatch, extra_env: dict[str, str]):
         yield c
 
     config_mod.get_settings.cache_clear()
-    for fn in (deps.get_repo, deps._extractor, deps.get_command_bus, deps.get_query_bus):
+    for fn in (
+        deps.get_repo,
+        deps.get_contact_repo,
+        deps.get_mailer,
+        deps._extractor,
+        deps.get_command_bus,
+        deps.get_query_bus,
+    ):
         fn.cache_clear()
 
 

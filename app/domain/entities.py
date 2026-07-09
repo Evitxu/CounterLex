@@ -18,6 +18,18 @@ class Case(BaseModel):
     reference: str | None = None  # e.g. an ECLI / BOE id when real
 
 
+class ContactMessage(BaseModel):
+    """A message submitted through the public contact form."""
+
+    id: UUID = Field(default_factory=uuid4)
+    name: str
+    surname: str
+    reply_email: str            # where the site owner should reply
+    observations: str
+    created_at: str = ""        # ISO-8601 UTC, set by the handler
+    email_sent: bool = False    # True if SMTP delivery succeeded
+
+
 class FactorContribution(BaseModel):
     key: str
     label: str

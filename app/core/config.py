@@ -53,6 +53,29 @@ class Settings(BaseSettings):
 
     frontend_origin: str = "http://localhost:3000"
 
+    # ---- Contact module (SMTP mail) ----
+    # A submitted message is emailed to `contact_recipient` and always saved to
+    # SQLite. Sending uses stdlib smtplib and is provider-agnostic. Leave the
+    # SMTP_* values unset and the module runs in "dev mode": messages are
+    # validated, sanitized, stored and logged, but no mail is sent (email_sent
+    # is False). For free real delivery use Gmail with an App Password:
+    #   SMTP_HOST=smtp.gmail.com  SMTP_PORT=587  SMTP_STARTTLS=true
+    #   SMTP_USER=<your gmail>  SMTP_PASSWORD=<16-char app password>
+    smtp_host: str | None = None
+    smtp_port: int = 587
+    smtp_user: str | None = None
+    smtp_password: str | None = None
+    smtp_from: str | None = None          # defaults to smtp_user
+    smtp_starttls: bool = True
+    smtp_timeout_seconds: float = 15.0
+    contact_recipient: str = "evitxuevs@gmail.com"
+
+    # Contact-form field limits (mirrored client-side in the frontend form).
+    contact_max_name: int = Field(default=60, ge=1)
+    contact_max_surname: int = Field(default=150, ge=1)
+    contact_max_email: int = Field(default=255, ge=1)
+    contact_max_observations: int = Field(default=1000, ge=1)
+
     # Optional shared secret protecting the state-mutating admin endpoints
     # (/corpus/generate, /model/train). If unset (default), they stay open so the
     # local demo and startup bootstrap work with zero config; set it in production

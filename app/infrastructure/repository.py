@@ -11,7 +11,7 @@ import sqlite3
 import threading
 from uuid import UUID
 
-from app.domain.entities import Case
+from app.domain.entities import Case, ContactMessage
 
 
 class CorpusRepository:
@@ -101,3 +101,75 @@ class CorpusRepository:
         if row is None:
             return None
         return json.loads(row["coef"]), row["intercept"], json.loads(row["metrics"])
+
+
+class ContactRepository:
+    """SQLite store for public contact-form submissions.
+
+    Its own table and connection (WAL allows concurrent readers/writers) so the
+    contact module never touches the corpus schema.
+    """
+
+    def __init__(self, path: str) -> None:
+        self._lock = threading.Lock()
+        self._conn = sqlite3.connect(path, check_same_thread=False)
+        self._conn.row_factory = sqlite3.Row
+        self._conn.execute("PRAGMA journal_mode=WAL")
+        self._create()
+
+    def _create(self) -> None:
+        with self._lock, self._conn:
+            self._conn.execute(
+                """
+                CREATE TABLE IF NOT EXISTS contact_messages (
+                    id TEXT PRIMARY KEY,
+                    name TEXT NOT NULL,
+                    surname TEXT NOT NULL,
+                    reply_email TEXT NOT NULL,
+                    observations TEXT NOT NULL,
+                    created_at TEXT NOT NULL,
+                    email_sent INTEGER NOT NULL DEFAULT 0
+                )
+                """
+            )
+
+    def add(self, msg: ContactMessage) -> None:
+        with self._lock, self._conn:
+            self._conn.execute(
+                "INSERT INTO contact_messages"
+                " (id, name, surname, reply_email, observations, created_at, email_sent)"
+                " VALUES (?, ?, ?, ?, ?, ?, ?)",
+                (
+                    str(msg.id),
+                    msg.name,
+                    msg.surname,
+                    msg.reply_email,
+                    msg.observations,
+                    msg.created_at,
+                    int(msg.email_sent),
+                ),
+            )
+
+    def all_messages(self) -> list[ContactMessage]:
+        with self._lock:
+            rows = self._conn.execute(
+                "SELECT * FROM contact_messages ORDER BY created_at"
+            ).fetchall()
+        return [
+            ContactMessage(
+                id=UUID(r["id"]),
+                name=r["name"],
+                surname=r["surname"],
+                reply_email=r["reply_email"],
+                observations=r["observations"],
+                created_at=r["created_at"],
+                email_sent=bool(r["email_sent"]),
+            )
+            for r in rows
+        ]
+
+    def count(self) -> int:
+        with self._lock:
+            return self._conn.execute(
+                "SELECT COUNT(*) AS n FROM contact_messages"
+            ).fetchone()["n"]

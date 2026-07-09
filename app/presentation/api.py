@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import hmac
+import re
 from datetime import datetime, timezone
 
 from fastapi import APIRouter, Depends, File, Header, HTTPException, Response, UploadFile
@@ -16,17 +17,24 @@ from app.domain.entities import CounterfactualResult
 from app.infrastructure.ocr import ocr_pdf
 from app.infrastructure.pdf_extractor import extract_pdf_text
 from app.infrastructure.report import build_report_pdf
-from app.application.commands import GenerateCorpusCommand, TrainModelCommand
+from app.application.commands import (
+    GenerateCorpusCommand,
+    SubmitContactMessageCommand,
+    SubmitContactResult,
+    TrainModelCommand,
+)
 from app.application.queries import (
     AnalyzeCaseQuery,
     CounterfactualQuery,
     DebateQuery,
     EvaluationQuery,
+    ListContactMessagesQuery,
     ListFactorsQuery,
     SearchJurisprudenceQuery,
 )
 from app.domain.entities import (
     CaseAnalysis,
+    ContactMessage,
     CounterfactualResult,
     DebateResult,
     JurisprudenceSearch,
@@ -256,3 +264,83 @@ async def report(body: ReportBody, bus: QueryBus = Depends(get_query_bus)) -> Re
         media_type="application/pdf",
         headers={"Content-Disposition": 'attachment; filename="counterlex-report.pdf"'},
     )
+
+
+# ---- contact form ----
+# A pragmatic email check (no external dependency): one @, a dot in the domain,
+# no whitespace. The frontend applies the same limits + a native email input.
+_EMAIL_RE = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
+
+
+def _clean_required(value: str, max_len: int, field: str) -> str:
+    """Sanitize (XSS/control-char strip), require non-empty, enforce max length."""
+    cleaned = sanitize_text(value)
+    if not cleaned:
+        raise ValueError(f"{field} is required.")
+    if len(cleaned) > max_len:
+        raise ValueError(f"{field} exceeds {max_len} characters.")
+    return cleaned
+
+
+class ContactBody(BaseModel):
+    name: str
+    surname: str
+    email: str          # reply-to address
+    observations: str
+
+    @field_validator("name")
+    @classmethod
+    def _v_name(cls, v: str) -> str:
+        return _clean_required(v, get_settings().contact_max_name, "Name")
+
+    @field_validator("surname")
+    @classmethod
+    def _v_surname(cls, v: str) -> str:
+        return _clean_required(v, get_settings().contact_max_surname, "Surname")
+
+    @field_validator("email")
+    @classmethod
+    def _v_email(cls, v: str) -> str:
+        cleaned = _clean_required(v, get_settings().contact_max_email, "Email")
+        if not _EMAIL_RE.match(cleaned):
+            raise ValueError("A valid email address is required.")
+        return cleaned
+
+    @field_validator("observations")
+    @classmethod
+    def _v_observations(cls, v: str) -> str:
+        return _clean_required(v, get_settings().contact_max_observations, "Observations")
+
+
+class ContactResult(BaseModel):
+    id: str
+    email_sent: bool
+
+
+@router.post("/contact", response_model=ContactResult)
+async def contact(
+    body: ContactBody, bus: CommandBus = Depends(get_command_bus)
+) -> ContactResult:
+    result = await bus.dispatch(
+        SubmitContactMessageCommand(
+            name=body.name,
+            surname=body.surname,
+            reply_email=body.email,
+            observations=body.observations,
+        )
+    )
+    assert isinstance(result, SubmitContactResult)
+    return ContactResult(id=result.id, email_sent=result.email_sent)
+
+
+@router.get("/contact/messages", response_model=list[ContactMessage])
+async def list_contact_messages(
+    bus: QueryBus = Depends(get_query_bus),
+    _: None = Depends(require_admin),
+) -> list[ContactMessage]:
+    """Admin: list submissions (newest first). Gated by `X-Admin-Key` when
+    `ADMIN_API_KEY` is configured; open otherwise (same policy as the other
+    admin endpoints)."""
+    result = await bus.ask(ListContactMessagesQuery())
+    assert isinstance(result, list)
+    return result

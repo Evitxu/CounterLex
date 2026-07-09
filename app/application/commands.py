@@ -7,9 +7,10 @@ from datetime import datetime, timezone
 from pydantic import BaseModel, Field
 
 from app.core.config import get_settings
-from app.domain.entities import Case
+from app.domain.entities import Case, ContactMessage
+from app.infrastructure.mailer import SmtpMailer
 from app.infrastructure.outcome_model import OutcomeModel
-from app.infrastructure.repository import CorpusRepository
+from app.infrastructure.repository import ContactRepository, CorpusRepository
 from app.infrastructure.synthetic import generate_corpus
 
 # A few hand-authored "real" seed cases (Spanish). They give the corpus some
@@ -103,3 +104,48 @@ class TrainModelHandler:
             model.coef, model.intercept, metrics, datetime.now(timezone.utc).isoformat()
         )
         return TrainModelResult(coef=model.coef, intercept=model.intercept, metrics=metrics)
+
+
+# ---- contact form -------------------------------------------------------
+class SubmitContactMessageCommand(BaseModel):
+    """Fields are already sanitized and length-checked by the route."""
+
+    name: str
+    surname: str
+    reply_email: str
+    observations: str
+
+
+class SubmitContactResult(BaseModel):
+    id: str
+    email_sent: bool  # False when SMTP isn't configured (dev mode) or delivery failed
+
+
+class SubmitContactHandler:
+    """Persist the submission (always) and email it to the site owner (best effort)."""
+
+    def __init__(self, repo: ContactRepository, mailer: SmtpMailer) -> None:
+        self._repo = repo
+        self._mailer = mailer
+
+    async def __call__(self, cmd: SubmitContactMessageCommand) -> SubmitContactResult:
+        msg = ContactMessage(
+            name=cmd.name,
+            surname=cmd.surname,
+            reply_email=cmd.reply_email,
+            observations=cmd.observations,
+            created_at=datetime.now(timezone.utc).isoformat(),
+        )
+        subject = f"CounterLex — nuevo mensaje de {msg.name} {msg.surname}"
+        body = (
+            f"Nombre: {msg.name} {msg.surname}\n"
+            f"Email de respuesta: {msg.reply_email}\n"
+            f"Fecha (UTC): {msg.created_at}\n\n"
+            f"Observaciones:\n{msg.observations}\n"
+        )
+        # Email is best-effort; persistence must succeed regardless.
+        msg.email_sent = self._mailer.send(
+            subject=subject, body=body, reply_to=msg.reply_email
+        )
+        self._repo.add(msg)
+        return SubmitContactResult(id=str(msg.id), email_sent=msg.email_sent)

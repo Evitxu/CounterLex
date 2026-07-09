@@ -7,6 +7,7 @@ from pydantic import BaseModel
 from app.core.logging import get_logger
 from app.domain.entities import (
     CaseAnalysis,
+    ContactMessage,
     CounterfactualResult,
     DebateResult,
     DebateTurn,
@@ -18,7 +19,7 @@ from app.domain.factors import FACTORS, GROUND_TRUTH
 from app.infrastructure.factor_extractor import FactorExtractor, detect_outcome
 from app.infrastructure.llm_client import LlmClient
 from app.infrastructure.outcome_model import OutcomeModel
-from app.infrastructure.repository import CorpusRepository
+from app.infrastructure.repository import ContactRepository, CorpusRepository
 from app.infrastructure.retrieval import PrecedentIndex
 
 log = get_logger(__name__)
@@ -65,6 +66,20 @@ class ListFactorsHandler:
              "description_es": f.description_es, "direction": f.direction}
             for f in FACTORS
         ]
+
+
+# --- contact submissions (admin read) ------------------------------------
+class ListContactMessagesQuery(BaseModel):
+    pass
+
+
+class ListContactMessagesHandler:
+    def __init__(self, repo: ContactRepository) -> None:
+        self._repo = repo
+
+    async def __call__(self, _: ListContactMessagesQuery) -> list[ContactMessage]:
+        # Newest first for a convenient admin view.
+        return list(reversed(self._repo.all_messages()))
 
 
 # --- analyze a free-text case --------------------------------------------

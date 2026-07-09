@@ -8,6 +8,8 @@ from app.application.buses import CommandBus, QueryBus
 from app.application.commands import (
     GenerateCorpusCommand,
     GenerateCorpusHandler,
+    SubmitContactHandler,
+    SubmitContactMessageCommand,
     TrainModelCommand,
     TrainModelHandler,
 )
@@ -20,6 +22,8 @@ from app.application.queries import (
     DebateQuery,
     EvaluationHandler,
     EvaluationQuery,
+    ListContactMessagesHandler,
+    ListContactMessagesQuery,
     ListFactorsHandler,
     ListFactorsQuery,
     SearchJurisprudenceHandler,
@@ -28,12 +32,23 @@ from app.application.queries import (
 from app.core.config import get_settings
 from app.infrastructure.factor_extractor import FactorExtractor
 from app.infrastructure.llm_client import build_llm_client
-from app.infrastructure.repository import CorpusRepository
+from app.infrastructure.mailer import SmtpMailer
+from app.infrastructure.repository import ContactRepository, CorpusRepository
 
 
 @lru_cache
 def get_repo() -> CorpusRepository:
     return CorpusRepository(get_settings().sqlite_path)
+
+
+@lru_cache
+def get_contact_repo() -> ContactRepository:
+    return ContactRepository(get_settings().sqlite_path)
+
+
+@lru_cache
+def get_mailer() -> SmtpMailer:
+    return SmtpMailer(get_settings())
 
 
 @lru_cache
@@ -47,6 +62,10 @@ def get_command_bus() -> CommandBus:
     repo = get_repo()
     bus.register(GenerateCorpusCommand, GenerateCorpusHandler(repo))
     bus.register(TrainModelCommand, TrainModelHandler(repo))
+    bus.register(
+        SubmitContactMessageCommand,
+        SubmitContactHandler(get_contact_repo(), get_mailer()),
+    )
     return bus
 
 
@@ -60,4 +79,5 @@ def get_query_bus() -> QueryBus:
     bus.register(DebateQuery, DebateHandler(repo, build_llm_client()))
     bus.register(CounterfactualQuery, CounterfactualHandler(repo))
     bus.register(EvaluationQuery, EvaluationHandler(repo))
+    bus.register(ListContactMessagesQuery, ListContactMessagesHandler(get_contact_repo()))
     return bus
