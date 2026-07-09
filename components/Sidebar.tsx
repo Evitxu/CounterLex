@@ -1,5 +1,6 @@
 "use client";
 
+import { Fragment } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useI18n } from "@/lib/i18n";
@@ -9,6 +10,7 @@ interface Item {
   icon: string;
   key: string;
   soon?: boolean;
+  divider?: boolean;
 }
 
 const ITEMS: Item[] = [
@@ -16,9 +18,10 @@ const ITEMS: Item[] = [
   { href: "/analyze", icon: "📄", key: "nav.analyze" },
   { href: "/reports", icon: "📑", key: "nav.reports" },
   { href: "/search", icon: "🔍", key: "nav.search" },
-  { href: "/compare", icon: "🆚", key: "nav.compare" },
+  { href: "/compare", icon: "🆚", key: "nav.compare", divider: true },
   { href: "/debate", icon: "🗣️", key: "nav.debate" },
-  { href: "/detective", icon: "🕵️", key: "nav.detective" },
+  { href: "/detective", icon: "🕵️", key: "nav.detective", divider: true },
+  { href: "/contact", icon: "✉️", key: "nav.contact" },
 ];
 
 export default function Sidebar() {
@@ -50,10 +53,23 @@ export default function Sidebar() {
           background: active ? "#3050b0" : "transparent",
           cursor: it.soon ? "default" : "pointer",
         };
-        return it.soon ? (
-          <span key={it.href} style={style}>{content}</span>
-        ) : (
-          <Link key={it.href} href={it.href} style={style}>{content}</Link>
+        return (
+          <Fragment key={it.href}>
+            {it.soon ? (
+              <span style={style}>{content}</span>
+            ) : (
+              <Link href={it.href} style={style}>{content}</Link>
+            )}
+            {it.divider && (
+              <hr
+                style={{
+                  border: "none",
+                  borderTop: "1px solid #e2e4ea",
+                  margin: "6px 4px",
+                }}
+              />
+            )}
+          </Fragment>
         );
       })}
     </nav>

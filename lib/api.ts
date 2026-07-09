@@ -1,5 +1,8 @@
 import type {
   CaseAnalysis,
+  ContactMessage,
+  ContactPayload,
+  ContactResult,
   CounterfactualResult,
   DebateResult,
   Evaluation,
@@ -94,6 +97,22 @@ export function counterfactual(
 
 export function getEvaluation(): Promise<Evaluation> {
   return fetch(`${API_BASE}/model/evaluation`).then(json<Evaluation>);
+}
+
+export function submitContact(payload: ContactPayload): Promise<ContactResult> {
+  return fetch(`${API_BASE}/contact`, {
+    method: "POST",
+    headers: jsonHeaders,
+    body: JSON.stringify(payload),
+  }).then(json<ContactResult>);
+}
+
+// Admin read. Sends the X-Admin-Key header when a key is provided; the endpoint
+// is open when the server has no ADMIN_API_KEY configured.
+export function listContactMessages(adminKey?: string): Promise<ContactMessage[]> {
+  return fetch(`${API_BASE}/contact/messages`, {
+    headers: adminKey ? { "X-Admin-Key": adminKey } : undefined,
+  }).then(json<ContactMessage[]>);
 }
 
 export async function downloadReport(

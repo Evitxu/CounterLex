@@ -83,3 +83,27 @@ export interface Evaluation {
   training_metrics: Record<string, number | string>;
   weights: EvaluationWeight[];
 }
+
+// Contact form (mirrors app/presentation/api.py ContactBody / ContactResult).
+export interface ContactPayload {
+  name: string;
+  surname: string;
+  email: string;
+  observations: string;
+}
+
+export interface ContactResult {
+  id: string;
+  email_sent: boolean; // false when SMTP isn't configured on the server (dev mode)
+}
+
+// A stored submission (admin read: GET /contact/messages).
+export interface ContactMessage {
+  id: string;
+  name: string;
+  surname: string;
+  reply_email: string;
+  observations: string;
+  created_at: string; // ISO-8601 UTC
+  email_sent: boolean;
+}

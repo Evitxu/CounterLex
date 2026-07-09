@@ -32,7 +32,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
                 marginTop: 8,
               }}
             >
-              © {new Date().getFullYear()} CounterLex
+              © {new Date().getFullYear()} CounterLex · EMDA
             </footer>
           </BusyProvider>
         </LanguageProvider>
