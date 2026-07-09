@@ -194,5 +194,5 @@ Cada rama de código incluye su **workflow de GitHub Actions** que corre sus tes
 en cada `push`/`pull request`. Toda la suite corre **offline**.
 
 ## Licencia / autoría
-Proyecto académico (TFM). © 2026 — autoría del alumno. El detalle metodológico y
+Proyecto académico (TFM). © 2026 — autoría de la alumna EMDA. El detalle metodológico y
 las limitaciones se recogen en la memoria del trabajo.

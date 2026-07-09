@@ -45,6 +45,17 @@ This repo uses **one branch per component** (like the sibling project):
   ALLOW_EXTRACTOR_FALLBACK=true
   BOOTSTRAP_ON_STARTUP=true
   FRONTEND_ORIGIN=<frontend URL from step 4>   # fill after step 4
+
+  # Contact module — REQUIRED in production (see "Contact module" below)
+  ADMIN_API_KEY=<a long random secret>         # gates /contact/messages + admin endpoints
+  CONTACT_RECIPIENT=evitxuevs@gmail.com
+  # Optional real email delivery (free Gmail App Password); omit → dev mode (saved, not emailed)
+  # SMTP_HOST=smtp.gmail.com
+  # SMTP_PORT=587
+  # SMTP_STARTTLS=true
+  # SMTP_USER=evitxuevs@gmail.com
+  # SMTP_PASSWORD=<16-char app password>
+  # SMTP_FROM=evitxuevs@gmail.com
   ```
 
 ### 4. Frontend service
@@ -65,12 +76,38 @@ This repo uses **one branch per component** (like the sibling project):
   automatically. (To use a real LLM, point `OLLAMA_BASE_URL` at a hosted endpoint.)
 - **Ephemeral filesystem** → the SQLite corpus resets on redeploy, but the app
   **bootstraps** (regenerates corpus + trains) on startup, so it self-heals.
-  If you want persistence, add a **Railway Volume** mounted where `SQLITE_PATH`
-  points, or set `SQLITE_PATH` to a path inside the volume.
+  ⚠️ **The contact-form submissions do NOT self-heal** — they are user data. To
+  keep them across redeploys you **must** add a **Railway Volume** (see below).
 - **`NEXT_PUBLIC_API_BASE` is build-time**: changing the backend URL means you
   must redeploy the frontend.
 - **CORS**: `FRONTEND_ORIGIN` accepts a comma list, e.g.
   `https://counterlex.up.railway.app,http://localhost:3000`.
+
+## Contact module (form + admin)
+
+The public form (`POST /api/v1/contact`) validates, sanitizes and stores each
+submission in SQLite, and — if SMTP is configured — emails it to
+`CONTACT_RECIPIENT`. Submissions are listed by `GET /api/v1/contact/messages`
+(and there is a `/admin` page in the frontend to read them).
+
+Two things to configure on Railway:
+
+1. **`ADMIN_API_KEY` — set it (important).** `GET /api/v1/contact/messages`
+   (and the corpus/train endpoints) are protected by the `X-Admin-Key` header
+   **only when `ADMIN_API_KEY` is set**. If you leave it unset in production,
+   that endpoint is **public** and anyone could read the submitted names and
+   emails. Set it to a long random secret; send it as `X-Admin-Key` to read
+   messages (the `/admin` page has a field for it).
+
+2. **Persistence — add a Railway Volume** so submissions survive redeploys:
+   - Backend service → **Variables**: `SQLITE_PATH=/data/counterlex.db`
+   - Backend service → **Settings → Volumes**: mount path `/data`
+   - Redeploy. The corpus/model bootstrap into the volume once; contact
+     messages then persist. (A volume attaches to one service — the backend.)
+
+Optionally set the `SMTP_*` variables (free Gmail App Password) so you also
+receive each message by email; without them the module runs in "dev mode"
+(stored + logged, `email_sent=false`).
 
 ## Why not add HTTPS in the app itself?
 On Railway (as on Vercel/Render/Cloud Run) TLS is handled by the platform's
