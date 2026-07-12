@@ -31,6 +31,7 @@ from app.application.queries import (
     ListContactMessagesQuery,
     ListFactorsQuery,
     SearchJurisprudenceQuery,
+    StatsQuery,
 )
 from app.domain.entities import (
     CaseAnalysis,
@@ -58,6 +59,12 @@ def require_admin(x_admin_key: str | None = Header(default=None)) -> None:
 @router.get("/factors")
 async def list_factors(bus: QueryBus = Depends(get_query_bus)):
     return await bus.ask(ListFactorsQuery())
+
+
+# ---- KPI dashboard stats (aggregate counts only; public) ----
+@router.get("/stats")
+async def stats(bus: QueryBus = Depends(get_query_bus)):
+    return await bus.ask(StatsQuery())
 
 
 # ---- corpus + model (setup / admin) ----

@@ -82,6 +82,12 @@ class CorpusRepository:
         with self._lock:
             return self._conn.execute("SELECT COUNT(*) AS n FROM cases").fetchone()["n"]
 
+    def count_real(self) -> int:
+        with self._lock:
+            return self._conn.execute(
+                "SELECT COUNT(*) AS n FROM cases WHERE is_real = 1"
+            ).fetchone()["n"]
+
     def clear(self) -> None:
         with self._lock, self._conn:
             self._conn.execute("DELETE FROM cases")
@@ -173,3 +179,49 @@ class ContactRepository:
             return self._conn.execute(
                 "SELECT COUNT(*) AS n FROM contact_messages"
             ).fetchone()["n"]
+
+    def count_emailed(self) -> int:
+        with self._lock:
+            return self._conn.execute(
+                "SELECT COUNT(*) AS n FROM contact_messages WHERE email_sent = 1"
+            ).fetchone()["n"]
+
+
+class UsageRepository:
+    """Persistent per-endpoint usage counters (event -> count).
+
+    Incremented by an HTTP middleware after each successful request to a tracked
+    endpoint. Stored in the same SQLite file; like the corpus, it resets on an
+    ephemeral deploy unless a volume is mounted.
+    """
+
+    def __init__(self, path: str) -> None:
+        self._lock = threading.Lock()
+        self._conn = sqlite3.connect(path, check_same_thread=False)
+        self._conn.row_factory = sqlite3.Row
+        self._conn.execute("PRAGMA journal_mode=WAL")
+        self._create()
+
+    def _create(self) -> None:
+        with self._lock, self._conn:
+            self._conn.execute(
+                """
+                CREATE TABLE IF NOT EXISTS usage_events (
+                    event TEXT PRIMARY KEY,
+                    count INTEGER NOT NULL DEFAULT 0
+                )
+                """
+            )
+
+    def increment(self, event: str) -> None:
+        with self._lock, self._conn:
+            self._conn.execute(
+                "INSERT INTO usage_events (event, count) VALUES (?, 1)"
+                " ON CONFLICT(event) DO UPDATE SET count = count + 1",
+                (event,),
+            )
+
+    def totals(self) -> dict[str, int]:
+        with self._lock:
+            rows = self._conn.execute("SELECT event, count FROM usage_events").fetchall()
+        return {r["event"]: r["count"] for r in rows}

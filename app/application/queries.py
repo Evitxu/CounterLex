@@ -15,12 +15,24 @@ from app.domain.entities import (
     JurisprudenceSearch,
     OutcomePrediction,
 )
-from app.domain.factors import FACTORS, GROUND_TRUTH
+from app.domain.factors import FACTOR_KEYS, FACTORS, GROUND_TRUTH
 from app.infrastructure.factor_extractor import FactorExtractor, detect_outcome
 from app.infrastructure.llm_client import LlmClient
 from app.infrastructure.outcome_model import OutcomeModel
-from app.infrastructure.repository import ContactRepository, CorpusRepository
+from app.infrastructure.repository import ContactRepository, CorpusRepository, UsageRepository
 from app.infrastructure.retrieval import PrecedentIndex
+
+# Tracked usage events (mirrors the middleware map in app/main.py); listed here
+# so /stats always reports every counter, even those still at zero.
+USAGE_EVENTS = (
+    "analyze_text",
+    "analyze_pdf",
+    "search",
+    "counterfactual",
+    "debate",
+    "report",
+    "contact",
+)
 
 log = get_logger(__name__)
 
@@ -66,6 +78,73 @@ class ListFactorsHandler:
              "description_es": f.description_es, "direction": f.direction}
             for f in FACTORS
         ]
+
+
+# --- KPI dashboard stats -------------------------------------------------
+class StatsQuery(BaseModel):
+    pass
+
+
+class StatsHandler:
+    """Aggregate KPIs for the dashboard: model performance, corpus/data,
+    contact-form, and per-endpoint usage. Aggregate counts only — no PII."""
+
+    def __init__(
+        self,
+        corpus: CorpusRepository,
+        contact: ContactRepository,
+        usage: UsageRepository,
+    ) -> None:
+        self._corpus = corpus
+        self._contact = contact
+        self._usage = usage
+
+    async def __call__(self, _: StatsQuery) -> dict:
+        total = self._corpus.count()
+        real = self._corpus.count_real()
+
+        state = self._corpus.load_model()
+        if state is not None:
+            coef, _intercept, metrics = state
+            mae = round(
+                sum(abs(GROUND_TRUTH[f.key] - coef[f.key]) for f in FACTORS) / len(FACTORS),
+                4,
+            )
+            model = {
+                "trained": True,
+                "test_accuracy": metrics.get("test_accuracy"),
+                "test_auc": metrics.get("test_auc"),
+                "test_brier": metrics.get("test_brier"),
+                "train_accuracy": metrics.get("train_accuracy"),
+                "mae": mae,
+                "n": metrics.get("n"),
+                "backend": metrics.get("backend"),
+            }
+        else:
+            model = {"trained": False}
+
+        contact_total = self._contact.count()
+        emailed = self._contact.count_emailed()
+        usage = self._usage.totals()
+
+        return {
+            "model": model,
+            "corpus": {
+                "total": total,
+                "synthetic": total - real,
+                "real": real,
+                "factors": len(FACTOR_KEYS),
+            },
+            "contact": {
+                "total": contact_total,
+                "emailed": emailed,
+                "saved_only": contact_total - emailed,
+            },
+            "usage": {
+                **{e: usage.get(e, 0) for e in USAGE_EVENTS},
+                "total": sum(usage.get(e, 0) for e in USAGE_EVENTS),
+            },
+        }
 
 
 # --- contact submissions (admin read) ------------------------------------

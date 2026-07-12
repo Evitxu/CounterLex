@@ -64,6 +64,7 @@ def _client_ctx(tmp_path, monkeypatch, extra_env: dict[str, str]):
     for fn in (
         deps.get_repo,
         deps.get_contact_repo,
+        deps.get_usage_repo,
         deps.get_mailer,
         deps._extractor,
         deps.get_command_bus,
@@ -82,6 +83,7 @@ def _client_ctx(tmp_path, monkeypatch, extra_env: dict[str, str]):
     for fn in (
         deps.get_repo,
         deps.get_contact_repo,
+        deps.get_usage_repo,
         deps.get_mailer,
         deps._extractor,
         deps.get_command_bus,
