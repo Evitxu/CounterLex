@@ -9,6 +9,7 @@ import type {
   Factor,
   Factors,
   JurisprudenceSearch,
+  Stats,
 } from "./types";
 
 const API_BASE =
@@ -97,6 +98,10 @@ export function counterfactual(
 
 export function getEvaluation(): Promise<Evaluation> {
   return fetch(`${API_BASE}/model/evaluation`).then(json<Evaluation>);
+}
+
+export function getStats(): Promise<Stats> {
+  return fetch(`${API_BASE}/stats`).then(json<Stats>);
 }
 
 export function submitContact(payload: ContactPayload): Promise<ContactResult> {

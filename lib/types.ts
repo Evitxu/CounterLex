@@ -97,6 +97,32 @@ export interface ContactResult {
   email_sent: boolean; // false when SMTP isn't configured on the server (dev mode)
 }
 
+// KPI dashboard (GET /stats).
+export interface Stats {
+  model: {
+    trained: boolean;
+    test_accuracy?: number | null;
+    test_auc?: number | null;
+    test_brier?: number | null;
+    train_accuracy?: number | null;
+    mae?: number | null;
+    n?: number | null;
+    backend?: string | null;
+  };
+  corpus: { total: number; synthetic: number; real: number; factors: number };
+  contact: { total: number; emailed: number; saved_only: number };
+  usage: {
+    analyze_text: number;
+    analyze_pdf: number;
+    search: number;
+    counterfactual: number;
+    debate: number;
+    report: number;
+    contact: number;
+    total: number;
+  };
+}
+
 // A stored submission (admin read: GET /contact/messages).
 export interface ContactMessage {
   id: string;

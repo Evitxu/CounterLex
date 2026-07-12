@@ -21,7 +21,8 @@ const ITEMS: Item[] = [
   { href: "/compare", icon: "🆚", key: "nav.compare", divider: true },
   { href: "/debate", icon: "🗣️", key: "nav.debate" },
   { href: "/detective", icon: "🕵️", key: "nav.detective", divider: true },
-  { href: "/contact", icon: "✉️", key: "nav.contact" },
+  { href: "/contact", icon: "✉️", key: "nav.contact", divider: true },
+  { href: "/dashboard", icon: "📊", key: "nav.dashboard" },
 ];
 
 export default function Sidebar() {
