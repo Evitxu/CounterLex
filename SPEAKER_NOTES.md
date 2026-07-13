@@ -1,8 +1,12 @@
-# CounterLex — Notas del ponente
+# CounterLex — Notas del ponente (10 diapositivas)
 
-> Notas para la defensa, una por diapositiva y **en el mismo orden** que
-> `SLIDES.md`. Cópialas en el panel de *notas del orador* de cada diapositiva en
-> Gamma (no van en la lámina).
+> Una nota por diapositiva, en el **mismo orden** que `SLIDES.md` (adaptado al
+> límite de 10 tarjetas del plan gratuito de Gamma). Cópialas en el panel de
+> *notas del orador* de cada diapositiva (no van en la lámina).
+>
+> Gamma (plan gratuito) **no importa las notas automáticamente** al pegar el
+> texto: hay que añadirlas a mano en el panel de notas de cada diapositiva. Con
+> 10 diapositivas es rápido.
 
 ---
 
@@ -11,65 +15,47 @@ Preséntate y da la idea en una frase: *"CounterLex estima si un caso penal
 acabaría en condena a partir de sus factores jurídicos, y permite preguntar «¿y si
 un hecho hubiera sido distinto?» sobre un modelo interpretable."*
 
-## 2 · El problema
-Enfatiza la tensión entre utilidad predictiva y exigencia de justificación en el
-dominio jurídico. Una probabilidad sin porqué no le sirve a un jurista.
+## 2 · El problema y el objetivo
+Enfatiza la tensión entre utilidad predictiva y exigencia de justificación en
+Derecho: una probabilidad sin porqué no le sirve a un jurista. Fija el criterio de
+éxito: no solo "acierta", sino que permite intervenir y explicar.
 
-## 3 · Objetivo y pregunta de investigación
-Fija el criterio de éxito: no solo "acierta", sino "recupera los efectos
-verdaderos" — que es lo que da validez a los contrafactuales.
-
-## 4 · Contribución de la tesis
+## 3 · Contribución de la tesis
 Este es el corazón del TFM. La mayoría de trabajos solo miden accuracy; aquí, al
-conocer la "verdad", medimos la *recuperación de efectos*, que es lo que legitima
-un contrafactual.
+conocer la "verdad" (los pesos con los que se generó el corpus), medimos la
+*recuperación de efectos*, que es lo que legitima un contrafactual.
 
-## 5 · Enfoque metodológico
-Justifica por qué logística y no una red neuronal: no es (solo) por rendimiento, es
-porque el coeficiente ES la explicación y hace del `do()` una operación exacta bajo
-los supuestos del modelo.
+## 4 · Enfoque metodológico
+Justifica por qué logística y no una red neuronal: no es (solo) por rendimiento,
+es porque el coeficiente ES la explicación y hace del `do()` una operación exacta
+bajo los supuestos del modelo.
 
-## 6 · Arquitectura del sistema
-Destaca la separación de responsabilidades (las rutas solo tocan un bus; los
-commands mutan estado, las queries son de solo lectura) como buena práctica de
-ingeniería.
+## 5 · Arquitectura y funcionalidades
+Destaca la separación de responsabilidades (rutas → un bus; commands mutan estado,
+queries de solo lectura). Del catálogo de módulos, el núcleo científico es el
+**simulador** y el **contraste con el fallo**; el resto son aplicaciones del mismo modelo.
 
-## 7 · Funcionalidades
-No enumeres todo con detalle; di que el núcleo científico es el simulador + el
-contraste con el fallo, y el resto son aplicaciones del mismo modelo.
-
-## 8 · Contraste con el fallo real
+## 6 · Contraste con el fallo real
 Aclara el matiz ético: el sistema NO dice si el fallo es "correcto"; dice si el
 patrón de factores es coherente con lo que hicieron tribunales similares.
 
-## 9 · Resultados
+## 7 · Resultados
 El MAE bajo es la evidencia clave: el modelo no solo predice, recupera los efectos
-reales → los contrafactuales son creíbles. Recuerda que son cifras de esta
-instancia (semilla fija, reproducibles).
+reales → los contrafactuales son creíbles. Son cifras de esta instancia (semilla
+fija, reproducibles).
 
-## 10 · Validación e ingeniería
-Mensaje: no es un prototipo frágil; está probado end-to-end y con CI. Demuestra
-madurez de ingeniería, no solo un notebook.
+## 8 · Validación, ingeniería y despliegue
+No es un prototipo frágil: probado end-to-end, con CI, y desplegado en vivo sobre
+HTTPS con persistencia. En la nube la extracción usa el fallback por palabras clave
+(sin LLM). Un clic en la URL lo demuestra.
 
-## 11 · Demo en vivo
-Ten la app abierta en otra pestaña. Si falla la red, este guion sirve como respaldo
-narrado. URL: counterlex-production-frontend.up.railway.app.
+## 9 · Limitaciones y trabajo futuro
+Mostrar las limitaciones con claridad suma credibilidad y adelanta preguntas del
+tribunal. Cierra apuntando al futuro: datos reales anotados y control de confusión.
 
-## 12 · Limitaciones
-Mostrar las limitaciones con claridad suma credibilidad y suele adelantarse a las
-preguntas del tribunal.
-
-## 13 · Despliegue
-Un clic en la URL basta para demostrarlo en vivo. Menciona que la extracción usa el
-fallback por palabras clave en la nube (sin LLM).
-
-## 14 · Conclusiones y trabajo futuro
-Cierra volviendo a la pregunta de investigación y respóndela: *sí, y esta es la
-evidencia*.
-
-## 15 · Gracias · Preguntas
+## 10 · Gracias · Preguntas
 Posibles preguntas del tribunal:
 - *¿Por qué sintético?* → para conocer la verdad y medir recuperación; se declara la limitación.
 - *¿Por qué no deep learning?* → interpretabilidad y `do()` exacto priman sobre un margen de accuracy.
 - *¿Causalidad real?* → contrafactual **bajo los supuestos del modelo**, no causalidad garantizada.
-- *¿Sesgos?* → el corpus es sintético y controlado; con datos reales habría que auditar sesgos.
+- *¿Sesgos?* → corpus sintético y controlado; con datos reales habría que auditar sesgos.
