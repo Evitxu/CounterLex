@@ -36,7 +36,7 @@ workflow de **CI** (GitHub Actions) que ejecuta sus tests en cada push.
 |---------|--------|
 | 🌐 **Despliegue (app en funcionamiento)** | **App:** <https://counterlex-production-frontend.up.railway.app> · **API + docs:** <https://counterlex-production-backend.up.railway.app/docs> |
 | 💻 **Repositorio GitHub** | <https://github.com/Evitxu/CounterLex> |
-| 🖼️ **Slides de la presentación** | Guion: [`SLIDES.md`](SLIDES.md) · _deck final: pendiente_ |
+| 🖼️ **Slides de la presentación** | Contenido: [`SLIDES.md`](SLIDES.md) + notas: [`SPEAKER_NOTES.md`](SPEAKER_NOTES.md) · _deck final: pendiente_ |
 | 🎥 **Vídeo de explicación** | Guion y storyboard: [`VIDEO_SCRIPT.md`](VIDEO_SCRIPT.md) · _vídeo final: pendiente_ |
 | 🔑 **Usuario y contraseña de prueba** | **No aplica** — la aplicación es de acceso libre, no tiene login. |
 
