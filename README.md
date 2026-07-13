@@ -18,12 +18,12 @@ Este repositorio usa **una rama por componente**. El código **no** está en `ma
 
 **Obtener el código** — clona la rama que necesites:
 ```bash
-git clone -b backend  https://github.com/<usuario>/CounterLex.git CounterLex-backend
-git clone -b frontend https://github.com/<usuario>/CounterLex.git CounterLex-frontend
+git clone -b backend  https://github.com/Evitxu/CounterLex.git CounterLex-backend
+git clone -b frontend https://github.com/Evitxu/CounterLex.git CounterLex-frontend
 ```
 o, desde un único clon, usa *worktrees* para tener las dos a la vez:
 ```bash
-git clone https://github.com/<usuario>/CounterLex.git CounterLex && cd CounterLex
+git clone https://github.com/Evitxu/CounterLex.git CounterLex && cd CounterLex
 git worktree add ../CounterLex-backend  backend
 git worktree add ../CounterLex-frontend frontend
 ```
@@ -34,10 +34,10 @@ workflow de **CI** (GitHub Actions) que ejecuta sus tests en cada push.
 
 | Recurso | Enlace |
 |---------|--------|
-| 🌐 **Despliegue (app en funcionamiento)** | `https://<frontend>.up.railway.app` · API: `https://<backend>.up.railway.app/docs` |
-| 💻 **Repositorio GitHub** | `https://github.com/<usuario>/CounterLex` |
-| 🖼️ **Slides de la presentación** | `https://…` |
-| 🎥 **Vídeo de explicación** | `https://…` |
+| 🌐 **Despliegue (app en funcionamiento)** | **App:** <https://counterlex-production-frontend.up.railway.app> · **API + docs:** <https://counterlex-production-backend.up.railway.app/docs> |
+| 💻 **Repositorio GitHub** | <https://github.com/Evitxu/CounterLex> |
+| 🖼️ **Slides de la presentación** | _(pendiente — añadir enlace)_ |
+| 🎥 **Vídeo de explicación** | _(pendiente — añadir enlace)_ |
 | 🔑 **Usuario y contraseña de prueba** | **No aplica** — la aplicación es de acceso libre, no tiene login. |
 
 ---
@@ -95,7 +95,7 @@ Requisitos: Python ≥ 3.11 (3.12 recomendado) y Node.js ≥ 20.
 
 ### Backend (rama `backend`)
 ```bash
-git clone -b backend https://github.com/<usuario>/CounterLex.git CounterLex-backend
+git clone -b backend https://github.com/Evitxu/CounterLex.git CounterLex-backend
 cd CounterLex-backend
 python -m venv .venv
 .venv/Scripts/python -m pip install -e .          # Windows
@@ -107,7 +107,7 @@ API en <http://localhost:8000>, documentación en <http://localhost:8000/docs>.
 
 ### Frontend (rama `frontend`)
 ```bash
-git clone -b frontend https://github.com/<usuario>/CounterLex.git CounterLex-frontend
+git clone -b frontend https://github.com/Evitxu/CounterLex.git CounterLex-frontend
 cd CounterLex-frontend
 npm install
 # echo NEXT_PUBLIC_API_BASE=http://localhost:8000/api/v1 > .env.local

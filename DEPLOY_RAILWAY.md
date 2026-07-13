@@ -5,6 +5,25 @@ Railway **terminates HTTPS for you** at its edge — every service gets a
 TLS inside the app. You deploy two services (backend + frontend) from this one
 repo; each gets its own HTTPS domain.
 
+## ✅ Live deployment (current)
+
+Deployed on Railway — project **`ideal-vibrancy`**, environment `production`, two
+services from this repo:
+
+| Service | Branch | URL |
+|---------|--------|-----|
+| **Frontend** | `frontend` | <https://counterlex-production-frontend.up.railway.app> |
+| **Backend** (API) | `backend` | <https://counterlex-production-backend.up.railway.app> · [`/docs`](https://counterlex-production-backend.up.railway.app/docs) · [`/health`](https://counterlex-production-backend.up.railway.app/health) |
+
+- **Persistence:** a Railway **volume** (`backend-volume`) is mounted at `/data`
+  on the backend, with `SQLITE_PATH=/data/counterlex.db` — contact messages and
+  usage counters survive redeploys.
+- **Admin:** `ADMIN_API_KEY` is set, so `/api/v1/contact/messages` requires the
+  `X-Admin-Key` header (enter it in the `/admin` page).
+- **Contact email:** dev mode unless the `SMTP_*` variables are set (see below);
+  submissions are always saved to SQLite regardless.
+- **LLM:** no key deployed → factor extraction uses the keyword fallback.
+
 ## What's already prepared
 - `backend/railway.json` + `Procfile` → start `uvicorn app.main:app --host 0.0.0.0 --port $PORT`
 - `backend/requirements.txt` + `.python-version` (3.12) → reliable Nixpacks build
@@ -17,7 +36,7 @@ repo; each gets its own HTTPS domain.
 ### 1. Push this repo to GitHub
 ```bash
 cd C:\Eva\BigSchool\Master\CounterLex
-git remote add origin https://github.com/<you>/CounterLex.git
+git remote add origin https://github.com/Evitxu/CounterLex.git
 git push -u origin main
 ```
 (Or use the Railway CLI: `railway up`. GitHub is simpler for redeploys.)
