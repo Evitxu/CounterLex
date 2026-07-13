@@ -57,7 +57,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
                 </g>
                 <circle cx="32" cy="16" r="3.4" fill="#ffffff" />
               </svg>
-              © {new Date().getFullYear()} CounterLex · *_* EMDA *_*
+              © {new Date().getFullYear()} CounterLex · EMDA *_*
             </footer>
           </BusyProvider>
         </LanguageProvider>
