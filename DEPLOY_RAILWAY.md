@@ -12,8 +12,8 @@ services from this repo:
 
 | Service | Branch | URL |
 |---------|--------|-----|
-| **Frontend** | `frontend` | <https://counterlex-production-frontend.up.railway.app> |
-| **Backend** (API) | `backend` | <https://counterlex-production-backend.up.railway.app> · [`/docs`](https://counterlex-production-backend.up.railway.app/docs) · [`/health`](https://counterlex-production-backend.up.railway.app/health) |
+| **Frontend** | `frontend` | <https://counterlex.up.railway.app> |
+| **Backend** (API) | `backend` | <https://counterlex-api.up.railway.app> · [`/docs`](https://counterlex-api.up.railway.app/docs) · [`/health`](https://counterlex-api.up.railway.app/health) |
 
 - **Persistence:** a Railway **volume** (`backend-volume`) is mounted at `/data`
   on the backend, with `SQLITE_PATH=/data/counterlex.db` — contact messages and
@@ -58,7 +58,7 @@ This repo uses **one branch per component** (like the sibling project):
 - Railway detects Python (via `requirements.txt` + `.python-version`) and uses the
   start command from `railway.json`.
 - **Networking → Generate Domain** → copy the backend URL, e.g.
-  `https://counterlex-backend.up.railway.app`.
+  `https://counterlex-api.up.railway.app`.
 - **Variables** (Settings → Variables):
   ```
   ALLOW_EXTRACTOR_FALLBACK=true
@@ -80,7 +80,7 @@ This repo uses **one branch per component** (like the sibling project):
 ### 4. Frontend service
 - **Variables** — set BEFORE the build (NEXT_PUBLIC_* is baked in at build time):
   ```
-  NEXT_PUBLIC_API_BASE=https://counterlex-backend.up.railway.app/api/v1
+  NEXT_PUBLIC_API_BASE=https://counterlex-api.up.railway.app/api/v1
   ```
 - **Networking → Generate Domain** → copy the frontend URL, e.g.
   `https://counterlex.up.railway.app`.

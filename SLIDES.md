@@ -8,7 +8,7 @@ Predicción interpretable de resultados judiciales penales y análisis contrafac
 
 Trabajo de Fin de Máster · EMDA · 2026
 
-App: counterlex-production-frontend.up.railway.app
+App: counterlex.up.railway.app
 
 ---
 
@@ -81,6 +81,6 @@ App: counterlex-production-frontend.up.railway.app
 
 **CounterLex** · EMDA · 2026
 
-App: counterlex-production-frontend.up.railway.app
+App: counterlex.up.railway.app
 
 Repo: github.com/Evitxu/CounterLex

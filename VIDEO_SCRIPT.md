@@ -2,7 +2,7 @@
 
 > Vídeo de ~6 minutos. Formato por bloques: **[PANTALLA]** = qué se ve/graba,
 > **🎙️ NARRACIÓN** = lo que dices. Graba la pantalla con la app abierta en
-> `https://counterlex-production-frontend.up.railway.app` (idioma ES).
+> `https://counterlex.up.railway.app` (idioma ES).
 > Tiempos orientativos; ajústalos a tu ritmo.
 
 ---
