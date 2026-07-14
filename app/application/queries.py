@@ -266,19 +266,21 @@ class DebateQuery(BaseModel):
 
 _DEBATE_SYS = {
     "es": (
-        "Eres un simulador de debate jurídico sobre un caso penal español. A partir de "
-        "los factores del caso y los precedentes, redacta argumentos BREVES (2-3 frases "
-        "cada uno) para tres roles. Devuelve SOLO un objeto JSON con las claves exactas "
-        "'fiscal', 'defensa' y 'juez'. El fiscal argumenta a favor de la condena; la "
-        "defensa a favor de la absolución; el juez hace una síntesis ponderada y prudente. "
-        "No inventes hechos fuera de los factores dados."
+        "Eres un simulador de debate jurídico sobre un caso penal español. Redacta "
+        "argumentos BREVES (2-3 frases) para tres roles. Responde ÚNICAMENTE con un objeto "
+        "JSON válido con EXACTAMENTE tres claves: \"fiscal\", \"defensa\" y \"juez\". El "
+        "valor de cada clave debe ser UNA SOLA cadena de texto (string), nunca un objeto ni "
+        "una lista. El fiscal argumenta a favor de la condena; la defensa a favor de la "
+        "absolución; el juez hace una síntesis ponderada y prudente. No inventes hechos "
+        "fuera de los factores dados."
     ),
     "en": (
-        "You simulate a legal debate about a Spanish criminal case. From the case factors "
-        "and precedents, write BRIEF arguments (2-3 sentences each) for three roles. Return "
-        "ONLY a JSON object with the exact keys 'fiscal', 'defensa', 'juez'. The 'fiscal' "
-        "(prosecutor) argues for conviction; 'defensa' (defence) for acquittal; 'juez' "
-        "(judge) gives a balanced, cautious synthesis. Do not invent facts beyond those given."
+        "You simulate a legal debate about a Spanish criminal case. Write BRIEF arguments "
+        "(2-3 sentences) for three roles. Reply ONLY with a valid JSON object with EXACTLY "
+        "three keys: \"fiscal\", \"defensa\", \"juez\". Each key's value must be a SINGLE "
+        "text string, never an object or a list. The 'fiscal' (prosecutor) argues for "
+        "conviction; 'defensa' (defence) for acquittal; 'juez' (judge) gives a balanced, "
+        "cautious synthesis. Do not invent facts beyond those given."
     ),
 }
 
@@ -330,10 +332,12 @@ class DebateHandler:
             raw = await self._llm.generate_json(_DEBATE_SYS[lang], user)
             for role in ("fiscal", "defensa", "juez"):
                 val = raw.get(role)
-                if isinstance(val, list):  # small models often return a list of sentences
-                    text = " ".join(str(x) for x in val if x)
-                elif isinstance(val, str):
+                if isinstance(val, str):
                     text = val
+                elif isinstance(val, list):  # small models sometimes return a list of sentences
+                    text = " ".join(str(x) for x in val if x)
+                elif isinstance(val, dict):  # …or nest the sentences in an object
+                    text = " ".join(str(x) for x in val.values() if x)
                 else:
                     text = ""
                 if text.strip():

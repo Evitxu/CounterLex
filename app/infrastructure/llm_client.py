@@ -24,6 +24,13 @@ _GROQ_BASE = "https://api.groq.com/openai/v1"
 _GROQ_MODEL = "llama-3.1-8b-instant"
 
 
+def _extract_json(text: str) -> str:
+    """Best-effort: pull the JSON object out of a model reply that may be wrapped
+    in ```json fences or surrounded by prose (common with smaller models)."""
+    i, j = text.find("{"), text.rfind("}")
+    return text[i : j + 1] if i != -1 and j > i else text
+
+
 class LlmClient:
     def __init__(self) -> None:
         s = get_settings()
@@ -58,7 +65,8 @@ class LlmClient:
             return False
 
     async def generate_json(self, system: str, user: str) -> dict:
-        return json.loads(await self._chat(system, user, json_mode=True))
+        raw = await self._chat(system, user, json_mode=True)
+        return json.loads(_extract_json(raw))
 
     async def generate_text(self, system: str, user: str) -> str:
         return await self._chat(system, user, json_mode=False)
@@ -70,16 +78,29 @@ class LlmClient:
         ]
         async with httpx.AsyncClient(timeout=self.timeout) as c:
             if self.provider == "openai":
-                body: dict = {
-                    "model": self.model,
-                    "messages": messages,
-                    "temperature": 0.0 if json_mode else 0.3,
-                }
-                if json_mode:
-                    body["response_format"] = {"type": "json_object"}
-                r = await c.post(
-                    f"{self.base}/chat/completions", json=body, headers=self._headers()
-                )
+                def _body(strict: bool) -> dict:
+                    b: dict = {
+                        "model": self.model,
+                        "messages": messages,
+                        "temperature": 0.0 if json_mode else 0.3,
+                    }
+                    if json_mode and strict:
+                        b["response_format"] = {"type": "json_object"}
+                    return b
+
+                url = f"{self.base}/chat/completions"
+                r = await c.post(url, json=_body(True), headers=self._headers())
+                # Groq's strict JSON validator can return 400 on borderline output
+                # from smaller models; retry once without it and parse leniently.
+                if r.status_code == 400 and json_mode:
+                    code = ""
+                    try:
+                        code = r.json().get("error", {}).get("code", "")
+                    except Exception:  # noqa: BLE001
+                        pass
+                    if code == "json_validate_failed":
+                        log.info("groq json_validate_failed; retrying without strict json mode")
+                        r = await c.post(url, json=_body(False), headers=self._headers())
                 r.raise_for_status()
                 return r.json()["choices"][0]["message"]["content"]
             # ollama
