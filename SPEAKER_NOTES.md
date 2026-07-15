@@ -46,8 +46,11 @@ fija, reproducibles).
 
 ## 8 · Validación, ingeniería y despliegue
 No es un prototipo frágil: probado end-to-end, con CI, y desplegado en vivo sobre
-HTTPS con persistencia. En la nube la extracción usa el fallback por palabras clave
-(sin LLM). Un clic en la URL lo demuestra.
+HTTPS con persistencia (volumen). En la nube usa **Groq** como LLM, así que la
+extracción con IA y el **debate multiagente** funcionan (con fallback por palabras
+clave si el LLM no estuviera disponible).
+Demo en vivo: **https://counterlex.up.railway.app** · API/docs:
+**https://counterlex-api.up.railway.app/docs**
 
 ## 9 · Limitaciones y trabajo futuro
 Mostrar las limitaciones con claridad suma credibilidad y adelanta preguntas del
