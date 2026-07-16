@@ -34,6 +34,8 @@ bajo los supuestos del modelo.
 Destaca la separación de responsabilidades (rutas → un bus; commands mutan estado,
 queries de solo lectura). Del catálogo de módulos, el núcleo científico es el
 **simulador** y el **contraste con el fallo**; el resto son aplicaciones del mismo modelo.
+Apóyate en el **diagrama de arquitectura** (ver `ARCHITECTURE.md`, diagramas 1 y 2):
+expórtalo a imagen en mermaid.live e insértalo en esta diapositiva en Gamma.
 
 ## 6 · Contraste con el fallo real
 Aclara el matiz ético: el sistema NO dice si el fallo es "correcto"; dice si el
