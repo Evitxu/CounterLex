@@ -3,8 +3,7 @@
 # code folders so they can never be accidentally committed onto `main`.
 /backend/
 /frontend/
-/docs/*
-!/docs/memoria.md
+/docs/
 
 # Env / secrets — never commit
 .env

@@ -124,8 +124,6 @@ la nube, usa Groq: `LLM_PROVIDER=openai`, `LLM_API_KEY=<tu clave>`.
 > 📐 **Arquitectura y flujos** (Mermaid): [`ARCHITECTURE.md`](ARCHITECTURE.md)
 > — sistema, CQRS del backend, pipeline de análisis, mecanismo contrafactual y
 > topología de despliegue.
->
-> 📄 **Memoria (borrador):** [`docs/memoria.md`](docs/memoria.md).
 
 Cada componente vive en su rama, con el código en la raíz:
 
