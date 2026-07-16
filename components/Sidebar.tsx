@@ -23,6 +23,7 @@ const ITEMS: Item[] = [
   { href: "/detective", icon: "🕵️", key: "nav.detective", divider: true },
   { href: "/contact", icon: "✉️", key: "nav.contact", divider: true },
   { href: "/dashboard", icon: "📊", key: "nav.dashboard" },
+  { href: "/help", icon: "❓", key: "nav.help" },
 ];
 
 export default function Sidebar() {
