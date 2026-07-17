@@ -39,6 +39,7 @@ workflow de **CI** (GitHub Actions) que ejecuta sus tests en cada push.
 | 🖼️ **Slides de la presentación** | Contenido: [`SLIDES.md`](SLIDES.md) + notas: [`SPEAKER_NOTES.md`](SPEAKER_NOTES.md) · _deck final: pendiente_ |
 | 🎥 **Vídeo de explicación** | Guion y storyboard: [`VIDEO_SCRIPT.md`](VIDEO_SCRIPT.md) · _vídeo final: pendiente_ |
 | 🔑 **Usuario y contraseña de prueba** | **No aplica** — la aplicación es de acceso libre, no tiene login. |
+| 🧪 **Material de prueba** | Sentencias de ejemplo en [`sentencias-test/`](sentencias-test/) para el módulo *Analizar sentencia* (ver §7). |
 
 ---
 
@@ -169,6 +170,28 @@ Detalles clave: subida de PDF hasta 20 MB, OCR para escaneados, i18n ES/EN,
 sistema de login ni datos de usuario. El corpus sintético se genera de forma
 reproducible en el servidor. (Los endpoints de administración pueden protegerse de
 forma opcional con la cabecera `X-Admin-Key` si se configura `ADMIN_API_KEY`.)
+
+---
+
+## 7. Material de prueba (para evaluar el proyecto)
+
+Para facilitar la evaluación, el repositorio incluye **sentencias de ejemplo** en
+[`sentencias-test/`](sentencias-test/): súbelas en **Analizar sentencia**
+(<https://counterlex.up.railway.app/analyze>) sin tener que buscar ninguna.
+
+| Archivo | Resultado esperado |
+|---------|--------------------|
+| `STS_1000_2025.pdf` | Condena (veredicto mixto, sentencia extensa) |
+| `STS_3067_2026.pdf` · `STS_3118_2026.pdf` | Condena |
+| `STS_5477_2025.pdf` · `STS_6333_2024.pdf` | Resolución procesal (fallo sin condena/absolución) |
+
+Detalles por archivo en [`sentencias-test/README.md`](sentencias-test/README.md).
+
+**Conseguir más sentencias** — buscador oficial del Poder Judicial (CENDOJ):
+<https://www.poderjudicial.es/search/> · Tribunal Supremo:
+<https://www.poderjudicial.es/search/TS/>. Elige sentencias **penales** cuyo fallo
+**condene o absuelva** para ver el *contraste con el fallo* completo; las
+resoluciones procesales muestran un mensaje aclaratorio.
 
 ---
 
