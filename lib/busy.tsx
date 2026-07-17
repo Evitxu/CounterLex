@@ -77,7 +77,8 @@ function Overlay({ progress }: { progress: number | null }) {
     >
       <div
         style={{
-          background: "#fff",
+          background: "var(--surface)",
+          color: "var(--text)",
           borderRadius: 12,
           padding: "18px 24px",
           minWidth: 240,
@@ -96,7 +97,7 @@ function Overlay({ progress }: { progress: number | null }) {
               marginTop: 12,
               height: 8,
               borderRadius: 4,
-              background: "#eceef3",
+              background: "var(--surface-2)",
               overflow: "hidden",
             }}
           >
@@ -104,7 +105,7 @@ function Overlay({ progress }: { progress: number | null }) {
               style={{
                 width: `${progress}%`,
                 height: "100%",
-                background: "#3050b0",
+                background: "var(--accent)",
                 transition: "width 0.15s linear",
               }}
             />
