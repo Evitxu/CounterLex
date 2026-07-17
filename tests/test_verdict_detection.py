@@ -12,7 +12,7 @@ STS 1000/2025 (García Ortiz) fallo text.
 
 from __future__ import annotations
 
-from app.infrastructure.factor_extractor import detect_outcome
+from app.infrastructure.factor_extractor import detect_outcome, detect_outcome_status
 
 
 def test_plain_conviction():
@@ -87,3 +87,19 @@ def test_denominacion_social_is_not_a_conviction():
 def test_accent_insensitive():
     assert detect_outcome("FALLO: se le condená e impone la pena.") is True
     assert detect_outcome("FALLO: procede la absolución del acusado.") is False
+
+
+def test_outcome_status_distinguishes_procedural_from_not_found():
+    # Convicts / acquits.
+    assert detect_outcome_status("F A L L O condenamos al acusado.") == "convicted"
+    assert detect_outcome_status("Fallo: absolvemos al acusado.") == "acquitted"
+    # Operative part located, but it is NOT a conviction/acquittal (e.g. a
+    # jurisdiction ruling) -> procedural, not a false "not found".
+    procedural = (
+        "F A L L O esta Sala ha decidido resolver el conflicto de jurisdiccion "
+        "a favor de la jurisdiccion penal ordinaria y declarar de oficio las costas."
+    )
+    assert detect_outcome_status(procedural) == "procedural"
+    assert detect_outcome(procedural) is None
+    # No operative part at all.
+    assert detect_outcome_status("Se hallo un arma en la escena del delito.") == "not_found"

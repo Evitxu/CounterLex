@@ -56,10 +56,16 @@ def _collapse(s: str) -> str:
     return _LETTER_SPACED.sub(lambda m: m.group(0).replace(" ", ""), s)
 
 
-def detect_outcome(text: str) -> bool | None:
-    """Best-effort detection of the court's decision from the ruling text.
+def detect_outcome_status(text: str) -> str:
+    """Best-effort classification of the ruling's operative decision.
 
-    Returns True (conviction), False (acquittal), or None if it can't be told.
+    Returns one of:
+      - "convicted"  — the operative part convicts (headline of a mixed verdict).
+      - "acquitted"  — the operative part acquits.
+      - "procedural" — an operative part (FALLO / parte dispositiva) WAS located,
+                       but it is not a conviction/acquittal — e.g. a jurisdiction
+                       or competence ruling, a cassation on procedural grounds.
+      - "not_found"  — no operative part could be located at all.
 
     A full judgment mentions *both* conviction and acquittal everywhere (reasoning,
     cited precedents, dissenting votes), and the operative FALLO can itself be
@@ -67,22 +73,24 @@ def detect_outcome(text: str) -> bool | None:
     operative ruling — the letter-spaced "F A L L O" heading, else "parte
     dispositiva" / "ha decidido" / the last plain "fallo" — read a bounded window
     up to any following "voto particular", and (2) treat conviction as the
-    headline of a mixed verdict (a partial acquittal does not erase a conviction).
-    Accent-insensitive and robust to letter-spacing. Works without an LLM.
+    headline of a mixed verdict. Accent-insensitive and robust to letter-spacing.
     """
     norm = _norm(text)
 
     # 1) Locate the operative ruling.
     m = _SPACED_FALLO.search(norm)  # distinctive letter-spaced heading
     start = m.start() if m else -1
+    located = start != -1
     if start == -1:
         norm = _collapse(norm)
         for marker in ("parte dispositiva", "ha decidido"):
             start = norm.find(marker)
             if start != -1:
+                located = True
                 break
         if start == -1:
             start = norm.rfind("fallo")
+            located = start != -1
 
     # 2) Build the scope: from the anchor to the next dissenting vote (or a cap).
     if start == -1:
@@ -97,10 +105,18 @@ def detect_outcome(text: str) -> bool | None:
     has_conv = any(s in scope for s in _CONVICT_STEMS)
     has_acq = any(s in scope for s in _ACQUIT_STEMS)
     if has_conv:  # conviction is the headline, even with partial acquittals
-        return True
+        return "convicted"
     if has_acq:
-        return False
-    return None
+        return "acquitted"
+    # Operative part located but no condena/absolución → procedural resolution.
+    return "procedural" if located else "not_found"
+
+
+def detect_outcome(text: str) -> bool | None:
+    """True (conviction), False (acquittal), or None if it can't be told.
+    Thin wrapper over :func:`detect_outcome_status`."""
+    status = detect_outcome_status(text)
+    return True if status == "convicted" else False if status == "acquitted" else None
 
 
 def _coerce(raw: dict) -> dict[str, bool]:

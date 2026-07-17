@@ -16,7 +16,7 @@ from app.domain.entities import (
     OutcomePrediction,
 )
 from app.domain.factors import FACTOR_KEYS, FACTORS, GROUND_TRUTH
-from app.infrastructure.factor_extractor import FactorExtractor, detect_outcome
+from app.infrastructure.factor_extractor import FactorExtractor, detect_outcome_status
 from app.infrastructure.llm_client import LlmClient
 from app.infrastructure.outcome_model import OutcomeModel
 from app.infrastructure.repository import ContactRepository, CorpusRepository, UsageRepository
@@ -183,12 +183,15 @@ class AnalyzeCaseHandler:
         precedents = PrecedentIndex(self._repo.all_cases()).query(
             factors, get_settings().top_k_precedents
         )
+        status = detect_outcome_status(q.full_text or q.text)
+        detected = True if status == "convicted" else False if status == "acquitted" else None
         return CaseAnalysis(
             factors=factors,
             prediction=prediction,
             precedents=precedents,
             extraction_source=source,
-            detected_outcome=detect_outcome(q.full_text or q.text),
+            detected_outcome=detected,
+            verdict_status=status,
         )
 
 

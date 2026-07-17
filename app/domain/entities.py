@@ -61,6 +61,10 @@ class CaseAnalysis(BaseModel):
     # The court's actual decision detected in the text: True=conviction,
     # False=acquittal, None=couldn't determine.
     detected_outcome: bool | None = None
+    # Finer-grained status behind `detected_outcome`:
+    #   "convicted" | "acquitted" | "procedural" (operative part found but no
+    #   conviction/acquittal, e.g. a jurisdiction ruling) | "not_found".
+    verdict_status: str = "not_found"
 
 
 class DebateTurn(BaseModel):
