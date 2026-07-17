@@ -39,6 +39,7 @@ export interface CaseAnalysis {
   precedents: PrecedentRef[];
   extraction_source: string; // "llm" | "keyword"
   detected_outcome: boolean | null; // true=conviction, false=acquittal, null=unknown
+  verdict_status?: string; // "convicted" | "acquitted" | "procedural" | "not_found"
 }
 
 export interface DebateTurn {

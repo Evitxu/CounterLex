@@ -188,7 +188,9 @@ export default function AnalyzePage() {
           <div style={{ ...card, borderLeft: `4px solid ${opinionColor}` }}>
             <strong>{t("opinionTitle")}</strong>
             {verdict === null ? (
-              <p style={{ color: "var(--text-faint)", margin: "8px 0 0", fontSize: 14 }}>{t("opinionUnknown")}</p>
+              <p style={{ color: "var(--text-faint)", margin: "8px 0 0", fontSize: 14 }}>
+                {analysis.verdict_status === "procedural" ? t("opinionProcedural") : t("opinionUnknown")}
+              </p>
             ) : (
               <>
                 <div style={{ display: "flex", gap: 28, flexWrap: "wrap", margin: "10px 0" }}>
