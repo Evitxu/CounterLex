@@ -74,7 +74,8 @@ confusión no modelada) declaradas abiertamente.
 - **Arquitectura limpia + CQRS**: `domain` (puro) → `application` (buses de
   Command/Query) → `infrastructure` (I/O) → `presentation` (rutas).
 - **scikit-learn** (regresión logística) con *fallback* a numpy.
-- **SQLite** (stdlib) para el corpus y el estado del modelo.
+- **SQLite** (stdlib) para el corpus, el modelo, los mensajes de contacto y los
+  contadores de uso.
 - **pypdf** + **pypdfium2/pytesseract** (OCR opcional), **fpdf2** (informes).
 - **LLM agnóstico**: **Ollama** local o API compatible con OpenAI (**Groq**), con
   *fallback* por palabras clave.
@@ -84,7 +85,7 @@ confusión no modelada) declaradas abiertamente.
 - Visualizaciones **SVG/CSS propias**, **i18n ES/EN**, subida de PDF con progreso.
 
 **Testing / tooling**
-- **pytest** + **pytest-asyncio** (backend) · **Vitest** (frontend) · **ruff**.
+- **pytest** + **pytest-asyncio** (backend) · **Vitest** + **Playwright** (frontend) · **ruff**.
 - **CI**: GitHub Actions por rama (ver §Testing).
 
 **Despliegue:** **Railway** (dos servicios; HTTPS gestionado en el edge).
@@ -132,11 +133,11 @@ backend  (rama)                    frontend  (rama)
 ├─ app/                            ├─ app/            # páginas (App Router)
 │  ├─ domain/       # factores     ├─ components/     # gauge, barras, waterfall…
 │  ├─ application/  # CQRS          ├─ lib/            # api, model (+ tests), i18n
-│  ├─ infrastructure/ # modelo,     ├─ package.json
-│  │                 # LLM, PDF…    └─ .github/workflows/ci.yml
-│  ├─ presentation/ # rutas API
+│  ├─ infrastructure/ # modelo,     ├─ e2e/           # tests Playwright (E2E)
+│  │                 # LLM, PDF…    ├─ package.json
+│  ├─ presentation/ # rutas API     └─ .github/workflows/  # ci.yml + e2e.yml
 │  └─ core/         # config, log
-├─ tests/           # 66 tests
+├─ tests/           # 80 tests
 ├─ pyproject.toml
 └─ .github/workflows/ci.yml
 ```
@@ -152,8 +153,12 @@ mutan estado (generar corpus, entrenar) y las *queries* son de solo lectura.
 | 🔎 **Buscar jurisprudencia** (`/search`) | Recupera los precedentes más similares por solapamiento de factores, explicando *por qué* coincide cada uno. |
 | 🔀 **Comparar casos** (`/compare`) | Descompone la diferencia de log-odds entre dos casos, factor a factor. |
 | 🗣️ **Debate multi-agente** (`/debate`) | Fiscal / defensa / juez argumentan (LLM), con consenso estadístico de respaldo. |
-| 📊 **Informe PDF** (`/reports`) | Genera un informe descargable del escenario analizado. |
-| 📈 **Evaluación del modelo** | Recuperación de los pesos verdaderos (MAE) + precisión / AUC / Brier en test. |
+| 🕵️ **Detective contrafactual** (`/detective`) | Juego educativo: acusa a un sospechoso y compáralo con el veredicto del modelo. |
+| 📑 **Informe PDF** (`/reports`) | Genera un informe descargable del escenario analizado. |
+| ✉️ **Contacta conmigo** (`/contact`) | Formulario validado y saneado (anti-XSS); guarda en SQLite y envía email (SMTP opcional). |
+| 📈 **Panel de métricas / KPIs** (`/dashboard`) | Rendimiento del modelo, datos del corpus, formulario de contacto y uso de la API. |
+| ❓ **Ayuda / Guía** (`/help`) | Explica cada módulo, glosario de factores, metodología y limitaciones (ES/EN). |
+| 📊 **Evaluación del modelo** | Recuperación de los pesos verdaderos (MAE) + precisión / AUC / Brier en test. |
 
 Detalles clave: subida de PDF hasta 20 MB, OCR para escaneados, i18n ES/EN,
 sanitización de entrada (defensa XSS) y despliegue con HTTPS.
@@ -162,7 +167,8 @@ sanitización de entrada (defensa XSS) y despliegue con HTTPS.
 
 **No aplica.** CounterLex es una herramienta de análisis de acceso libre; no tiene
 sistema de login ni datos de usuario. El corpus sintético se genera de forma
-reproducible en el servidor.
+reproducible en el servidor. (Los endpoints de administración pueden protegerse de
+forma opcional con la cabecera `X-Admin-Key` si se configura `ADMIN_API_KEY`.)
 
 ---
 
@@ -174,25 +180,33 @@ reproducible en el servidor.
 | POST | `/api/v1/analyze` · `/api/v1/analyze/pdf` | Texto/PDF → factores + predicción + **fallo** |
 | POST | `/api/v1/counterfactual` | Factores + intervenciones → nueva predicción |
 | POST | `/api/v1/search` · `/api/v1/debate` · `/api/v1/report` | Precedentes · debate · informe PDF |
-| GET  | `/api/v1/model/evaluation` | Recuperación de pesos + métricas |
+| GET  | `/api/v1/model/evaluation` · `/api/v1/stats` | Recuperación de pesos + métricas · KPIs del panel |
+| POST | `/api/v1/contact` · GET `/api/v1/contact/messages` | Contacto (público) · listado (admin, `X-Admin-Key`) |
 | POST | `/api/v1/corpus/generate` · `/api/v1/model/train` | Admin (protegibles con `ADMIN_API_KEY`) |
 
 ## Despliegue
 Guía completa en [`DEPLOY_RAILWAY.md`](DEPLOY_RAILWAY.md). Dos servicios en
 Railway, cada uno siguiendo su rama (`backend` / `frontend`) con **Root
 Directory `/`**; Railway sirve **HTTPS** automáticamente. Sin Ollama en la nube,
-la extracción usa el *fallback* por palabras clave; el corpus se **auto-genera**
-al arrancar.
+la extracción usa **Groq** (o el *fallback* por palabras clave); el corpus se
+**auto-genera** al arrancar. Con un **volumen** persistente, los mensajes de
+contacto y los contadores de uso sobreviven a los redespliegues.
 
 ## Testing
-- **Backend (66 tests, `pytest`)** — catálogo de factores, modelo (recuperación
+- **Backend (80 tests, `pytest`)** — catálogo de factores, modelo (recuperación
   de signos, aditividad log-odds, métricas hold-out), **detección del fallo**
   (incluye "F A L L O" con espacios y el veredicto **mixto** real de la
   STS 1000/2025), extractor por palabras clave, sanitización, recuperación de
   precedentes, generador sintético, repositorio, buses CQRS, **guard de admin**,
-  **límite de subida** y **todas las rutas HTTP** de extremo a extremo.
+  **límite de subida**, **módulo de contacto**, **KPIs** y **todas las rutas
+  HTTP** de extremo a extremo.
 - **Frontend (8 tests, `Vitest`)** — reconstrucción del modelo lineal en cliente,
   probabilidad, efectos por factor, comparación de casos y *waterfall*.
+- **E2E (15 tests, `Playwright`)** — flujos de UI en un navegador real
+  (alternativa moderna a Selenium, con auto-espera): *smoke* de todas las rutas,
+  simulador contrafactual, formulario de contacto, cambio de idioma ES/EN, panel
+  de KPIs y debate (con degradación elegante sin LLM). En CI se arranca un backend
+  aislado para ejecutarlos.
 
 Cada rama de código incluye su **workflow de GitHub Actions** que corre sus tests
 en cada `push`/`pull request`. Toda la suite corre **offline**.
