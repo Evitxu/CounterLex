@@ -71,12 +71,15 @@ recupera los efectos verdaderos, y eso es lo que hace creíbles los contrafactua
 
 ## 4:30–5:15 · Arquitectura e ingeniería (breve)
 **[PANTALLA]** Opcional: el repo en GitHub, o el `/docs` (Swagger) del backend.
+Toca el **interruptor de tema (🌙/☀️)** de la cabecera para enseñar el **modo oscuro**.
 
 🎙️ *"Por dentro: backend en FastAPI con arquitectura limpia y CQRS, frontend en
-Next.js y React, y scikit-learn para el modelo. Está probado con más de 80 tests
-automáticos e integración continua, y desplegado en Railway sobre HTTPS. La
-extracción de factores funciona incluso sin un modelo de lenguaje, con un
-heurístico por palabras clave."*
+Next.js y React, y scikit-learn para el modelo. La interfaz es bilingüe —español e
+inglés— y tiene modo claro y oscuro. Está probado con más de 80 tests automáticos,
+además de pruebas de extremo a extremo en el navegador con Playwright, e
+integración continua; y está desplegado en Railway sobre HTTPS. La extracción de
+factores funciona incluso sin un modelo de lenguaje, con un heurístico por
+palabras clave."*
 
 ---
 

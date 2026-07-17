@@ -34,8 +34,10 @@ bajo los supuestos del modelo.
 Destaca la separación de responsabilidades (rutas → un bus; commands mutan estado,
 queries de solo lectura). Del catálogo de módulos, el núcleo científico es el
 **simulador** y el **contraste con el fallo**; el resto son aplicaciones del mismo modelo.
-Apóyate en el **diagrama de arquitectura** (ver `ARCHITECTURE.md`, diagramas 1 y 2):
-expórtalo a imagen en mermaid.live e insértalo en esta diapositiva en Gamma.
+La interfaz es **bilingüe (ES/EN)** y tiene **modo claro/oscuro** (interruptor en la
+cabecera) — buen detalle para enseñar en vivo. Apóyate en el **diagrama de
+arquitectura** (ver `ARCHITECTURE.md`, diagramas 1 y 2): expórtalo a imagen en
+mermaid.live e insértalo en esta diapositiva en Gamma.
 
 ## 6 · Contraste con el fallo real
 Aclara el matiz ético: el sistema NO dice si el fallo es "correcto"; dice si el
@@ -47,8 +49,10 @@ reales → los contrafactuales son creíbles. Son cifras de esta instancia (semi
 fija, reproducibles).
 
 ## 8 · Validación, ingeniería y despliegue
-No es un prototipo frágil: probado end-to-end, con CI, y desplegado en vivo sobre
-HTTPS con persistencia (volumen). En la nube usa **Groq** como LLM, así que la
+No es un prototipo frágil: **80 tests** de backend (pytest) + **8** de frontend
+(Vitest) + **17 pruebas E2E** en navegador con **Playwright** (alternativa moderna
+a Selenium), con **CI** por rama, y desplegado en vivo sobre HTTPS con persistencia
+(volumen). En la nube usa **Groq** como LLM, así que la
 extracción con IA y el **debate multiagente** funcionan (con fallback por palabras
 clave si el LLM no estuviera disponible).
 Demo en vivo: **https://counterlex.up.railway.app** · API/docs:

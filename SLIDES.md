@@ -39,9 +39,9 @@ App: counterlex.up.railway.app
 
 ## Arquitectura y funcionalidades
 
-- **Backend** FastAPI + **CQRS**; **frontend** Next.js/React; **SQLite**; **scikit-learn**.
+- **Backend** FastAPI + **CQRS**; **frontend** Next.js/React (i18n ES/EN, **modo claro/oscuro**); **SQLite**; **scikit-learn**.
 - Extracción de factores LLM-agnóstica (Ollama/Groq) con **fallback por palabras clave**.
-- Módulos: **simulador contrafactual**, **analizar sentencia (PDF + OCR)**, buscar jurisprudencia, comparar casos, debate multiagente, informe PDF, detective y **panel de KPIs**.
+- Módulos: **simulador contrafactual**, **analizar sentencia (PDF + OCR)**, buscar jurisprudencia, comparar casos, debate multiagente, informe PDF, detective, **panel de KPIs** y ayuda.
 
 ---
 
@@ -63,7 +63,7 @@ App: counterlex.up.railway.app
 
 ## Validación, ingeniería y despliegue
 
-- **80 tests** backend (pytest) + **8** frontend (vitest), suite **offline**; **CI** por rama.
+- **80 tests** backend (pytest) + **8** frontend (Vitest) + **17 E2E** en navegador (Playwright), suite **offline**; **CI** por rama.
 - Sanitización (XSS), guard de admin, límites de subida, contraste del fallo — todo probado.
 - **Railway**: dos servicios + **HTTPS**; **volumen** persistente; corpus **auto-generado** al arrancar.
 

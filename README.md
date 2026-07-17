@@ -82,7 +82,7 @@ confusión no modelada) declaradas abiertamente.
 
 **Frontend** (rama `frontend`)
 - **Next.js 15** (App Router) + **React 19** + **TypeScript**.
-- Visualizaciones **SVG/CSS propias**, **i18n ES/EN**, subida de PDF con progreso.
+- Visualizaciones **SVG/CSS propias**, **i18n ES/EN**, **modo claro/oscuro**, subida de PDF con progreso.
 
 **Testing / tooling**
 - **pytest** + **pytest-asyncio** (backend) · **Vitest** + **Playwright** (frontend) · **ruff**.
@@ -161,7 +161,7 @@ mutan estado (generar corpus, entrenar) y las *queries* son de solo lectura.
 | 📊 **Evaluación del modelo** | Recuperación de los pesos verdaderos (MAE) + precisión / AUC / Brier en test. |
 
 Detalles clave: subida de PDF hasta 20 MB, OCR para escaneados, i18n ES/EN,
-sanitización de entrada (defensa XSS) y despliegue con HTTPS.
+**modo claro/oscuro**, sanitización de entrada (defensa XSS) y despliegue con HTTPS.
 
 ## 6. Usuario y contraseña de prueba
 
@@ -202,11 +202,11 @@ contacto y los contadores de uso sobreviven a los redespliegues.
   HTTP** de extremo a extremo.
 - **Frontend (8 tests, `Vitest`)** — reconstrucción del modelo lineal en cliente,
   probabilidad, efectos por factor, comparación de casos y *waterfall*.
-- **E2E (15 tests, `Playwright`)** — flujos de UI en un navegador real
+- **E2E (17 tests, `Playwright`)** — flujos de UI en un navegador real
   (alternativa moderna a Selenium, con auto-espera): *smoke* de todas las rutas,
-  simulador contrafactual, formulario de contacto, cambio de idioma ES/EN, panel
-  de KPIs y debate (con degradación elegante sin LLM). En CI se arranca un backend
-  aislado para ejecutarlos.
+  simulador contrafactual, formulario de contacto, cambio de idioma ES/EN, **modo
+  claro/oscuro**, panel de KPIs y debate (con degradación elegante sin LLM). En CI
+  se arranca un backend aislado para ejecutarlos.
 
 Cada rama de código incluye su **workflow de GitHub Actions** que corre sus tests
 en cada `push`/`pull request`. Toda la suite corre **offline**.
