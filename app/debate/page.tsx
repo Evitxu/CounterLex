@@ -9,17 +9,17 @@ import FactorToggles from "@/components/FactorToggles";
 import PrecedentList from "@/components/PrecedentList";
 
 const card: React.CSSProperties = {
-  background: "#fff",
-  border: "1px solid #e2e4ea",
+  background: "var(--surface)",
+  border: "1px solid var(--border)",
   borderRadius: 10,
   padding: 16,
   marginBottom: 16,
 };
 
 const ROLE_COLOR: Record<string, string> = {
-  fiscal: "#c0341d",
-  defensa: "#0a7d28",
-  juez: "#3050b0",
+  fiscal: "var(--role-fiscal)",
+  defensa: "var(--role-defensa)",
+  juez: "var(--accent)",
 };
 
 export default function DebatePage() {
@@ -66,8 +66,8 @@ export default function DebatePage() {
   return (
     <section>
       <h1 style={{ marginTop: 0 }}>🗣️ {t("debateTitle")}</h1>
-      <p style={{ color: "#555", maxWidth: 760 }}>{t("debateIntro")}</p>
-      {err && <p style={{ color: "crimson" }}>{err} — {t("backendError")}</p>}
+      <p style={{ color: "var(--text-muted)", maxWidth: 760 }}>{t("debateIntro")}</p>
+      {err && <p style={{ color: "var(--danger)" }}>{err} — {t("backendError")}</p>}
 
       <div className="cl-grid">
         {/* Left: configure + generate */}
@@ -90,21 +90,21 @@ export default function DebatePage() {
             <>
               <div style={card}>
                 <strong>{t("debateConsensus")}</strong>
-                <p style={{ margin: "8px 0 0", color: "#333" }}>{result.consensus}</p>
+                <p style={{ margin: "8px 0 0", color: "var(--text)" }}>{result.consensus}</p>
               </div>
 
               {!result.llm_available && (
-                <div style={{ ...card, background: "#fff8e6", border: "1px solid #f0d48a" }}>
-                  <span style={{ fontSize: 14, color: "#8a6d1b" }}>{t("debateNoLlm")}</span>
+                <div style={{ ...card, background: "var(--warn-bg)", border: "1px solid var(--warn-border)" }}>
+                  <span style={{ fontSize: 14, color: "var(--warn-text)" }}>{t("debateNoLlm")}</span>
                 </div>
               )}
 
               {result.turns.map((turn) => (
-                <div key={turn.role} style={{ ...card, borderLeft: `4px solid ${ROLE_COLOR[turn.role] ?? "#888"}` }}>
-                  <strong style={{ color: ROLE_COLOR[turn.role] ?? "#333" }}>
+                <div key={turn.role} style={{ ...card, borderLeft: `4px solid ${ROLE_COLOR[turn.role] ?? "var(--text-faint)"}` }}>
+                  <strong style={{ color: ROLE_COLOR[turn.role] ?? "var(--text)" }}>
                     {t(`role.${turn.role}`)}
                   </strong>
-                  <p style={{ margin: "8px 0 0", color: "#333", lineHeight: 1.5 }}>{turn.argument}</p>
+                  <p style={{ margin: "8px 0 0", color: "var(--text)", lineHeight: 1.5 }}>{turn.argument}</p>
                 </div>
               ))}
 
@@ -117,7 +117,7 @@ export default function DebatePage() {
             </>
           ) : (
             <div style={card}>
-              <p style={{ color: "#888", margin: 0 }}>{t("debateIntro")}</p>
+              <p style={{ color: "var(--text-faint)", margin: 0 }}>{t("debateIntro")}</p>
             </div>
           )}
         </div>

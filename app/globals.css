@@ -1,3 +1,58 @@
+:root {
+  color-scheme: light;
+  --bg: #f6f7f9;
+  --surface: #ffffff;
+  --surface-2: #f2f4f8;
+  --surface-accent: #eef1f8;
+  --border: #e2e4ea;
+  --border-input: #d2d7e0;
+  --border-faint: #eef1f5;
+  --text: #2b3444;
+  --text-strong: #1f2733;
+  --text-muted: #555555;
+  --text-faint: #888888;
+  --accent: #3050b0;
+  --accent-hover: #24409a;
+  --good: #1a7f37;
+  --good-bg: #e6f4ea;
+  --danger: crimson;
+  --danger-bg: #fdecea;
+  --role-fiscal: #c0341d;
+  --role-defensa: #0a7d28;
+  --gold: #b8860b;
+  --warn-bg: #fff8e6;
+  --warn-border: #f0d48a;
+  --warn-text: #8a6d1b;
+  --header-bg: #14161c;
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #0f1115;
+  --surface: #191c23;
+  --surface-2: #232833;
+  --surface-accent: #1d2946;
+  --border: #2b3240;
+  --border-input: #3a4252;
+  --border-faint: #262b36;
+  --text: #e6e9f0;
+  --text-strong: #f2f4f8;
+  --text-muted: #aab2c0;
+  --text-faint: #8792a1;
+  --accent: #5b7fe0;
+  --accent-hover: #7593e8;
+  --good: #4ecb71;
+  --good-bg: #16301f;
+  --danger: #ff8080;
+  --danger-bg: #3a1f22;
+  --role-fiscal: #d94f3a;
+  --role-defensa: #2ba350;
+  --gold: #e0b64a;
+  --warn-bg: #2c2611;
+  --warn-border: #5c4d1f;
+  --warn-text: #e6c766;
+  --header-bg: #0b0d11;
+}
+
 * { box-sizing: border-box; }
 html, body { max-width: 100%; overflow-x: hidden; }
 
@@ -37,22 +92,22 @@ html, body { max-width: 100%; overflow-x: hidden; }
 .btn:disabled { opacity: .45; cursor: not-allowed; }
 .btn:focus-visible { outline: none; box-shadow: 0 0 0 3px rgba(48, 80, 176, .30); }
 
-.btn-primary { background: #3050b0; color: #fff; border-color: #3050b0; }
-.btn-primary:hover:not(:disabled) { background: #24409a; box-shadow: 0 3px 10px rgba(48, 80, 176, .35); }
+.btn-primary { background: var(--accent); color: #fff; border-color: var(--accent); }
+.btn-primary:hover:not(:disabled) { background: var(--accent-hover); box-shadow: 0 3px 10px rgba(48, 80, 176, .35); }
 
-.btn-secondary { background: #fff; color: #2b3444; border-color: #d2d7e0; }
-.btn-secondary:hover:not(:disabled) { background: #f2f4f8; border-color: #b9c0cc; }
+.btn-secondary { background: var(--surface); color: var(--text); border-color: var(--border-input); }
+.btn-secondary:hover:not(:disabled) { background: var(--surface-2); border-color: var(--border-input); }
 
 /* ---- Text inputs ---- */
 textarea, input[type="text"], input[type="date"], input[type="number"] {
   font: inherit;
-  border: 1px solid #d2d7e0;
+  border: 1px solid var(--border-input);
   border-radius: 9px;
-  background: #fff;
+  background: var(--surface);
 }
 textarea:focus, input:focus {
   outline: none;
-  border-color: #3050b0;
+  border-color: var(--accent);
   box-shadow: 0 0 0 3px rgba(48, 80, 176, .15);
 }
 
@@ -74,8 +129,8 @@ textarea:focus, input:focus {
   display: flex;
   flex-direction: column;
   gap: 4px;
-  background: #fff;
-  border: 1px solid #e2e4ea;
+  background: var(--surface);
+  border: 1px solid var(--border);
   border-radius: 12px;
   padding: 10px;
   align-self: start;
@@ -87,8 +142,8 @@ textarea:focus, input:focus {
   font-size: 10px;
   text-transform: uppercase;
   letter-spacing: .4px;
-  color: #9aa0ad;
-  border: 1px solid #e2e4ea;
+  color: var(--text-faint);
+  border: 1px solid var(--border);
   border-radius: 6px;
   padding: 1px 5px;
 }
@@ -105,10 +160,10 @@ textarea:focus, input:focus {
 /* ---- Precedent cards ---- */
 .cl-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 10px; }
 .cl-card {
-  border: 1px solid #e2e4ea;
+  border: 1px solid var(--border);
   border-radius: 10px;
   padding: 12px;
-  background: #fff;
+  background: var(--surface);
   display: flex;
   flex-direction: column;
   gap: 8px;
@@ -117,8 +172,8 @@ textarea:focus, input:focus {
   align-self: flex-start;
   font-size: 12px;
   font-weight: 600;
-  color: #3050b0;
-  background: #eef1f8;
+  color: var(--accent);
+  background: var(--surface-accent);
   border: none;
   border-radius: 6px;
   padding: 4px 10px;
@@ -129,8 +184,8 @@ textarea:focus, input:focus {
 .cl-spinner {
   width: 22px;
   height: 22px;
-  border: 3px solid #d2d7e0;
-  border-top-color: #3050b0;
+  border: 3px solid var(--border-input);
+  border-top-color: var(--accent);
   border-radius: 50%;
   animation: cl-spin 0.8s linear infinite;
   display: inline-block;
@@ -141,5 +196,5 @@ textarea:focus, input:focus {
 
 /* ---- Sensitivity waterfall ---- */
 .cl-wf-row { display: flex; align-items: center; gap: 10px; padding: 4px 0; }
-.cl-wf-bar-track { position: relative; flex: 1; height: 14px; background: #eceef3; border-radius: 7px; min-width: 60px; }
+.cl-wf-bar-track { position: relative; flex: 1; height: 14px; background: var(--surface-2); border-radius: 7px; min-width: 60px; }
 .cl-wf-bar-fill { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 7px; transition: width .4s ease, background .4s ease; }

@@ -51,8 +51,8 @@ export default function Sidebar() {
           fontWeight: 600,
           textDecoration: "none",
           whiteSpace: "nowrap",
-          color: active ? "#fff" : it.soon ? "#9aa0ad" : "#2b3444",
-          background: active ? "#3050b0" : "transparent",
+          color: active ? "#fff" : it.soon ? "var(--text-faint)" : "var(--text)",
+          background: active ? "var(--accent)" : "transparent",
           cursor: it.soon ? "default" : "pointer",
         };
         return (
@@ -66,7 +66,7 @@ export default function Sidebar() {
               <hr
                 style={{
                   border: "none",
-                  borderTop: "1px solid #e2e4ea",
+                  borderTop: "1px solid var(--border)",
                   margin: "6px 4px",
                 }}
               />

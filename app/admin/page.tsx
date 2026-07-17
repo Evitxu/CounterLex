@@ -9,8 +9,8 @@ import type { ContactMessage } from "@/lib/types";
 const KEY_STORAGE = "counterlex_admin_key";
 
 const card: React.CSSProperties = {
-  background: "#fff",
-  border: "1px solid #e2e4ea",
+  background: "var(--surface)",
+  border: "1px solid var(--border)",
   borderRadius: 10,
   padding: 16,
   marginBottom: 16,
@@ -19,14 +19,14 @@ const card: React.CSSProperties = {
 const th: React.CSSProperties = {
   textAlign: "left",
   padding: "8px 10px",
-  borderBottom: "2px solid #e2e4ea",
+  borderBottom: "2px solid var(--border)",
   fontSize: 12,
-  color: "#666",
+  color: "var(--text-muted)",
   whiteSpace: "nowrap",
 };
 const td: React.CSSProperties = {
   padding: "8px 10px",
-  borderBottom: "1px solid #eef1f5",
+  borderBottom: "1px solid var(--border-faint)",
   fontSize: 13,
   verticalAlign: "top",
 };
@@ -72,7 +72,7 @@ export default function AdminPage() {
   return (
     <section>
       <h1 style={{ marginTop: 0 }}>🔐 {t("adminTitle")}</h1>
-      <p style={{ color: "#555", maxWidth: 760 }}>{t("adminIntro")}</p>
+      <p style={{ color: "var(--text-muted)", maxWidth: 760 }}>{t("adminIntro")}</p>
 
       <form onSubmit={onSubmit} style={{ ...card, display: "flex", gap: 8, flexWrap: "wrap", alignItems: "flex-end" }}>
         <label style={{ flex: 1, minWidth: 240 }}>
@@ -85,7 +85,7 @@ export default function AdminPage() {
             onChange={(e) => setAdminKey(e.target.value)}
             placeholder={t("adminKeyPlaceholder")}
             autoComplete="off"
-            style={{ width: "100%", padding: 10, border: "1px solid #d2d7e0", borderRadius: 8, fontSize: 14 }}
+            style={{ width: "100%", padding: 10, border: "1px solid var(--border-input)", borderRadius: 8, fontSize: 14 }}
           />
         </label>
         <button className="btn btn-primary" disabled={busy}>
@@ -93,13 +93,13 @@ export default function AdminPage() {
         </button>
       </form>
 
-      {err && <p style={{ color: "crimson" }}>{err}</p>}
+      {err && <p style={{ color: "var(--danger)" }}>{err}</p>}
 
       {messages && (
         <>
-          <p style={{ fontSize: 13, color: "#666" }}>{t("adminCount", { n: messages.length })}</p>
+          <p style={{ fontSize: 13, color: "var(--text-muted)" }}>{t("adminCount", { n: messages.length })}</p>
           {messages.length === 0 ? (
-            <p style={{ color: "#888" }}>{t("adminNone")}</p>
+            <p style={{ color: "var(--text-faint)" }}>{t("adminNone")}</p>
           ) : (
             <div style={{ ...card, overflowX: "auto", padding: 0 }}>
               <table style={{ borderCollapse: "collapse", width: "100%", minWidth: 720 }}>
@@ -115,14 +115,14 @@ export default function AdminPage() {
                 <tbody>
                   {messages.map((m) => (
                     <tr key={m.id}>
-                      <td style={{ ...td, whiteSpace: "nowrap", color: "#777" }}>
+                      <td style={{ ...td, whiteSpace: "nowrap", color: "var(--text-muted)" }}>
                         {m.created_at.replace("T", " ").slice(0, 16)}
                       </td>
                       <td style={{ ...td, whiteSpace: "nowrap" }}>
                         {m.name} {m.surname}
                       </td>
                       <td style={td}>
-                        <a href={`mailto:${m.reply_email}`} style={{ color: "#3050b0" }}>
+                        <a href={`mailto:${m.reply_email}`} style={{ color: "var(--accent)" }}>
                           {m.reply_email}
                         </a>
                       </td>
@@ -133,8 +133,8 @@ export default function AdminPage() {
                             fontSize: 12,
                             padding: "2px 8px",
                             borderRadius: 6,
-                            background: m.email_sent ? "#e6f4ea" : "#f2f4f8",
-                            color: m.email_sent ? "#1a7f37" : "#8a8f98",
+                            background: m.email_sent ? "var(--good-bg)" : "var(--surface-2)",
+                            color: m.email_sent ? "var(--good)" : "var(--text-faint)",
                           }}
                         >
                           {m.email_sent ? t("adminSentYes") : t("adminSentNo")}

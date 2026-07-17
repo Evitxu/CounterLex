@@ -10,8 +10,8 @@ import ProbabilityGauge from "@/components/ProbabilityGauge";
 import FactorToggles from "@/components/FactorToggles";
 
 const card: React.CSSProperties = {
-  background: "#fff",
-  border: "1px solid #e2e4ea",
+  background: "var(--surface)",
+  border: "1px solid var(--border)",
   borderRadius: 10,
   padding: 16,
   marginBottom: 16,
@@ -67,8 +67,8 @@ export default function ComparePage() {
   return (
     <section>
       <h1 style={{ marginTop: 0 }}>🆚 {t("compareTitle")}</h1>
-      <p style={{ color: "#555", maxWidth: 760 }}>{t("compareIntro")}</p>
-      {err && <p style={{ color: "crimson" }}>{err} — {t("backendError")}</p>}
+      <p style={{ color: "var(--text-muted)", maxWidth: 760 }}>{t("compareIntro")}</p>
+      {err && <p style={{ color: "var(--danger)" }}>{err} — {t("backendError")}</p>}
 
       <div className="cl-grid">
         <div style={card}>
@@ -93,11 +93,11 @@ export default function ComparePage() {
 
       <div style={card}>
         <strong>{t("compareDiffTitle")}</strong>
-        <p style={{ margin: "8px 0", color: "#333" }}>
+        <p style={{ margin: "8px 0", color: "var(--text)" }}>
           {t("compareDelta", { a: Math.round(pA * 100), b: Math.round(pB * 100), d: deltaPp > 0 ? `+${deltaPp}` : `${deltaPp}` })}
         </p>
         {diffs.length === 0 ? (
-          <p style={{ color: "#888", fontSize: 14 }}>{t("compareNoDiff")}</p>
+          <p style={{ color: "var(--text-faint)", fontSize: 14 }}>{t("compareNoDiff")}</p>
         ) : (
           <div style={{ display: "grid", gap: 6, marginTop: 6 }}>
             {diffs.map((d) => {
@@ -105,19 +105,19 @@ export default function ComparePage() {
               const favorsA = d.delta > 0;
               return (
                 <div key={d.key} style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 13 }}>
-                  <span style={{ width: 160, textAlign: "right", color: "#444" }}>{labelFor(d.key)}</span>
-                  <div style={{ position: "relative", flex: 1, height: 16, background: "#f2f3f7", borderRadius: 4, minWidth: 60 }}>
-                    <div style={{ position: "absolute", left: "50%", top: 0, bottom: 0, width: 1, background: "#c7ccd6" }} />
+                  <span style={{ width: 160, textAlign: "right", color: "var(--text)" }}>{labelFor(d.key)}</span>
+                  <div style={{ position: "relative", flex: 1, height: 16, background: "var(--surface-2)", borderRadius: 4, minWidth: 60 }}>
+                    <div style={{ position: "absolute", left: "50%", top: 0, bottom: 0, width: 1, background: "var(--border-input)" }} />
                     <div
                       style={{
                         position: "absolute", top: 2, bottom: 2, borderRadius: 3,
                         ...(favorsA
-                          ? { left: "50%", width: `${w}%`, background: "#3050b0" }
-                          : { right: "50%", width: `${w}%`, background: "#c0341d" }),
+                          ? { left: "50%", width: `${w}%`, background: "var(--accent)" }
+                          : { right: "50%", width: `${w}%`, background: "var(--role-fiscal)" }),
                       }}
                     />
                   </div>
-                  <span style={{ width: 120, fontSize: 11, color: favorsA ? "#3050b0" : "#c0341d" }}>
+                  <span style={{ width: 120, fontSize: 11, color: favorsA ? "var(--accent)" : "var(--role-fiscal)" }}>
                     {favorsA ? t("compareFavorsA") : t("compareFavorsB")}
                   </span>
                 </div>

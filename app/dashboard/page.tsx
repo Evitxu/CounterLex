@@ -7,21 +7,21 @@ import { useBusy } from "@/lib/busy";
 import type { Stats } from "@/lib/types";
 
 // Stat-tile dashboard (no charts → no series palette needed). Uses the app's
-// existing tokens: card #fff / border #e2e4ea / ink #2b3444 / muted #777.
+// existing tokens: card #fff / border var(--border) / ink var(--text) / muted var(--text-muted).
 const tile: React.CSSProperties = {
-  background: "#fff",
-  border: "1px solid #e2e4ea",
+  background: "var(--surface)",
+  border: "1px solid var(--border)",
   borderRadius: 12,
   padding: "16px 18px",
 };
 const bigNum: React.CSSProperties = {
   fontSize: 30,
   fontWeight: 700,
-  color: "#1f2733",
+  color: "var(--text-strong)",
   lineHeight: 1.1,
   fontVariantNumeric: "tabular-nums",
 };
-const tileLabel: React.CSSProperties = { fontSize: 12, color: "#777", marginTop: 6 };
+const tileLabel: React.CSSProperties = { fontSize: 12, color: "var(--text-muted)", marginTop: 6 };
 const grid: React.CSSProperties = {
   display: "grid",
   gridTemplateColumns: "repeat(auto-fill, minmax(150px, 1fr))",
@@ -41,7 +41,7 @@ function Tile({ value, label }: { value: string | number; label: string }) {
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <div style={{ marginBottom: 22 }}>
-      <h2 style={{ fontSize: 15, color: "#3050b0", margin: "0 0 10px" }}>{title}</h2>
+      <h2 style={{ fontSize: 15, color: "var(--accent)", margin: "0 0 10px" }}>{title}</h2>
       {children}
     </div>
   );
@@ -88,9 +88,9 @@ export default function DashboardPage() {
           {busy ? t("dashLoading") : t("dashRefresh")}
         </button>
       </div>
-      <p style={{ color: "#555", maxWidth: 760 }}>{t("dashIntro")}</p>
+      <p style={{ color: "var(--text-muted)", maxWidth: 760 }}>{t("dashIntro")}</p>
 
-      {err && <p style={{ color: "crimson" }}>{err} — {t("backendError")}</p>}
+      {err && <p style={{ color: "var(--danger)" }}>{err} — {t("backendError")}</p>}
 
       {stats && (
         <>
@@ -103,12 +103,12 @@ export default function DashboardPage() {
                   <Tile value={dec(m.test_brier)} label={t("dashBrier")} />
                   <Tile value={dec(m.mae)} label={t("dashMae")} />
                 </div>
-                <p style={{ fontSize: 12, color: "#999" }}>
+                <p style={{ fontSize: 12, color: "var(--text-faint)" }}>
                   {t("dashModelNote", { backend: m.backend ?? DASH, n: m.n ?? DASH })}
                 </p>
               </>
             ) : (
-              <p style={{ color: "#888" }}>{t("dashModelUntrained")}</p>
+              <p style={{ color: "var(--text-faint)" }}>{t("dashModelUntrained")}</p>
             )}
           </Section>
 
@@ -140,7 +140,7 @@ export default function DashboardPage() {
               <Tile value={int(u?.contact)} label={t("dashContacts")} />
               <Tile value={int(u?.total)} label={t("dashUsageTotal")} />
             </div>
-            <p style={{ fontSize: 12, color: "#999" }}>{t("dashUsageNote")}</p>
+            <p style={{ fontSize: 12, color: "var(--text-faint)" }}>{t("dashUsageNote")}</p>
           </Section>
         </>
       )}

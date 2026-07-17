@@ -24,10 +24,10 @@ export default function ProbabilityGauge({
         <span style={{ fontSize: "clamp(36px, 9vw, 52px)", fontWeight: 700, color: color(scenario), lineHeight: 1 }}>
           {pct}%
         </span>
-        <span style={{ color: "#555", fontSize: 14 }}>{t("gaugeLabel")}</span>
+        <span style={{ color: "var(--text-muted)", fontSize: 14 }}>{t("gaugeLabel")}</span>
       </div>
 
-      <div style={{ position: "relative", height: 22, background: "#eceef3", borderRadius: 11, marginTop: 12, overflow: "hidden" }}>
+      <div style={{ position: "relative", height: 22, background: "var(--surface-2)", borderRadius: 11, marginTop: 12, overflow: "hidden" }}>
         <div
           style={{
             width: `${pct}%`, height: "100%", background: color(scenario),
@@ -40,18 +40,18 @@ export default function ProbabilityGauge({
             style={{
               position: "absolute", top: -3,
               left: `calc(${Math.round(baseline * 100)}% - 1px)`,
-              width: 2, height: 28, background: "#1a1a2e",
+              width: 2, height: 28, background: "var(--text-strong)",
             }}
           />
         )}
       </div>
 
       <div style={{ display: "flex", justifyContent: "space-between", marginTop: 8, fontSize: 13, gap: 8, flexWrap: "wrap" }}>
-        <span style={{ color: "#666" }}>
+        <span style={{ color: "var(--text-muted)" }}>
           {baseline !== null ? `${t("gaugeBase")}: ${Math.round(baseline * 100)}%` : " "}
         </span>
         {deltaPp !== null && deltaPp !== 0 && (
-          <span style={{ fontWeight: 700, color: deltaPp < 0 ? "#0a7d28" : "#c0341d" }}>
+          <span style={{ fontWeight: 700, color: deltaPp < 0 ? "var(--role-defensa)" : "var(--role-fiscal)" }}>
             {deltaPp > 0 ? "▲" : "▼"} {deltaPp > 0 ? "+" : ""}
             {deltaPp} {t("gaugeDelta")}
           </span>

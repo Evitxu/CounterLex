@@ -8,8 +8,8 @@ import type { Factor, JurisprudenceSearch } from "@/lib/types";
 import PrecedentList from "@/components/PrecedentList";
 
 const card: React.CSSProperties = {
-  background: "#fff",
-  border: "1px solid #e2e4ea",
+  background: "var(--surface)",
+  border: "1px solid var(--border)",
   borderRadius: 10,
   padding: 16,
   marginBottom: 16,
@@ -57,7 +57,7 @@ export default function SearchPage() {
   return (
     <section>
       <h1 style={{ marginTop: 0 }}>🔍 {t("searchTitle")}</h1>
-      <p style={{ color: "#555", maxWidth: 760 }}>{t("searchIntro")}</p>
+      <p style={{ color: "var(--text-muted)", maxWidth: 760 }}>{t("searchIntro")}</p>
 
       <form onSubmit={run} style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
         <input
@@ -71,20 +71,20 @@ export default function SearchPage() {
           {busy ? t("searchRunning") : t("searchRun")}
         </button>
       </form>
-      <p style={{ fontSize: 12, color: "#999", marginTop: 6 }}>{t("searchDomainNote")}</p>
-      {err && <p style={{ color: "crimson" }}>{err} — {t("backendError")}</p>}
+      <p style={{ fontSize: 12, color: "var(--text-faint)", marginTop: 6 }}>{t("searchDomainNote")}</p>
+      {err && <p style={{ color: "var(--danger)" }}>{err} — {t("backendError")}</p>}
 
       {data && (
         <>
           {queryOn.length > 0 && (
             <div style={{ ...card, marginTop: 8 }}>
-              <div style={{ fontSize: 12, color: "#777", marginBottom: 8 }}>
+              <div style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 8 }}>
                 {t("searchQueryFactors")}
                 {data.extraction_source === "keyword" ? " · palabras clave" : " · IA"}
               </div>
               <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
                 {queryOn.map((k) => (
-                  <span key={k} style={{ fontSize: 12, background: "#eef1f8", color: "#3050b0", padding: "3px 8px", borderRadius: 6 }}>
+                  <span key={k} style={{ fontSize: 12, background: "var(--surface-accent)", color: "var(--accent)", padding: "3px 8px", borderRadius: 6 }}>
                     {labelFor(k)}
                   </span>
                 ))}
@@ -96,7 +96,7 @@ export default function SearchPage() {
             {t("searchResults")} ({data.results.length})
           </h2>
           {data.results.length === 0 ? (
-            <p style={{ color: "#888" }}>{t("searchNone")}</p>
+            <p style={{ color: "var(--text-faint)" }}>{t("searchNone")}</p>
           ) : (
             <PrecedentList precedents={data.results} labelFor={labelFor} />
           )}

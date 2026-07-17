@@ -8,8 +8,8 @@ import { useBusy } from "@/lib/busy";
 import type { Factor, Factors } from "@/lib/types";
 
 const card: React.CSSProperties = {
-  background: "#fff",
-  border: "1px solid #e2e4ea",
+  background: "var(--surface)",
+  border: "1px solid var(--border)",
   borderRadius: 10,
   padding: 16,
   marginBottom: 16,
@@ -70,25 +70,25 @@ export default function ReportsPage() {
   return (
     <section>
       <h1 style={{ marginTop: 0 }}>📑 {t("nav.reports")}</h1>
-      <p style={{ color: "#555", maxWidth: 760 }}>{t("reportsIntro")}</p>
-      {err && <p style={{ color: "crimson" }}>{err} — {t("backendError")}</p>}
+      <p style={{ color: "var(--text-muted)", maxWidth: 760 }}>{t("reportsIntro")}</p>
+      {err && <p style={{ color: "var(--danger)" }}>{err} — {t("backendError")}</p>}
 
       {!last ? (
         <div style={card}>
-          <p style={{ color: "#666", margin: 0 }}>
+          <p style={{ color: "var(--text-muted)", margin: 0 }}>
             {t("reportsNoCase")}{" "}
             <Link href="/">⚖ {t("nav.counterfactual")}</Link>
           </p>
         </div>
       ) : (
         <div style={card}>
-          <div style={{ fontSize: 12, color: "#777" }}>{t("reportsLatest")}</div>
+          <div style={{ fontSize: 12, color: "var(--text-muted)" }}>{t("reportsLatest")}</div>
           <div style={{ display: "flex", flexWrap: "wrap", gap: 6, margin: "8px 0" }}>
             {present.length === 0 ? (
-              <span style={{ color: "#888", fontSize: 14 }}>{t("none")}</span>
+              <span style={{ color: "var(--text-faint)", fontSize: 14 }}>{t("none")}</span>
             ) : (
               present.map((k) => (
-                <span key={k} style={{ fontSize: 12, background: "#eef1f8", color: "#3050b0", padding: "3px 8px", borderRadius: 6 }}>
+                <span key={k} style={{ fontSize: 12, background: "var(--surface-accent)", color: "var(--accent)", padding: "3px 8px", borderRadius: 6 }}>
                   {labelFor(k)}
                 </span>
               ))
@@ -97,10 +97,10 @@ export default function ReportsPage() {
 
           {changed.length > 0 && (
             <>
-              <div style={{ fontSize: 12, color: "#777" }}>{t("reportsChanges")}</div>
+              <div style={{ fontSize: 12, color: "var(--text-muted)" }}>{t("reportsChanges")}</div>
               <div style={{ display: "flex", flexWrap: "wrap", gap: 6, margin: "8px 0" }}>
                 {changed.map((k) => (
-                  <span key={k} style={{ fontSize: 12, background: "#fff8e6", color: "#b8860b", border: "1px solid #f0d48a", padding: "3px 8px", borderRadius: 6 }}>
+                  <span key={k} style={{ fontSize: 12, background: "var(--warn-bg)", color: "var(--gold)", border: "1px solid var(--warn-border)", padding: "3px 8px", borderRadius: 6 }}>
                     {(last.scenario[k] ? "+ " : "− ") + labelFor(k)}
                   </span>
                 ))}

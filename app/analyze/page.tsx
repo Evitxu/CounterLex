@@ -11,8 +11,8 @@ import ProbabilityGauge from "@/components/ProbabilityGauge";
 import PrecedentList from "@/components/PrecedentList";
 
 const card: React.CSSProperties = {
-  background: "#fff",
-  border: "1px solid #e2e4ea",
+  background: "var(--surface)",
+  border: "1px solid var(--border)",
   borderRadius: 10,
   padding: 16,
   marginBottom: 16,
@@ -106,7 +106,7 @@ export default function AnalyzePage() {
   const verdict = analysis ? analysis.detected_outcome : null;
   const modelConvicts = analysis ? analysis.prediction.probability >= 0.5 : false;
   const agree = verdict !== null && modelConvicts === verdict;
-  const opinionColor = verdict === null ? "#c7ccd6" : agree ? "#0a7d28" : "#f0a500";
+  const opinionColor = verdict === null ? "var(--border-input)" : agree ? "var(--role-defensa)" : "var(--gold)";
 
   // Reasons for the (dis)agreement: which present factors push in the model's
   // chosen direction, and which pull the other way. `influences` is already the
@@ -138,8 +138,8 @@ export default function AnalyzePage() {
   return (
     <section>
       <h1 style={{ marginTop: 0 }}>📄 {t("analyzeTitle")}</h1>
-      <p style={{ color: "#555", maxWidth: 760 }}>{t("analyzeIntro")}</p>
-      {err && <p style={{ color: "crimson" }}>{err} — {t("backendError")}</p>}
+      <p style={{ color: "var(--text-muted)", maxWidth: 760 }}>{t("analyzeIntro")}</p>
+      {err && <p style={{ color: "var(--danger)" }}>{err} — {t("backendError")}</p>}
 
       <div style={card}>
         <textarea
@@ -154,7 +154,7 @@ export default function AnalyzePage() {
           <button className="btn btn-primary" onClick={run} disabled={busy || text.trim().length < 10}>
             {busy ? t("analyzeRunning") : t("analyzeRun")}
           </button>
-          <span style={{ color: "#999", fontSize: 13 }}>{t("orSeparator")}</span>
+          <span style={{ color: "var(--text-faint)", fontSize: 13 }}>{t("orSeparator")}</span>
           <input
             ref={fileRef}
             type="file"
@@ -174,9 +174,9 @@ export default function AnalyzePage() {
           <button className="btn btn-secondary" type="button" onClick={() => setText(t("exampleText"))} disabled={busy}>
             {t("example")}
           </button>
-          {pdfName && <span style={{ fontSize: 12, color: "#666" }}>{pdfName}</span>}
+          {pdfName && <span style={{ fontSize: 12, color: "var(--text-muted)" }}>{pdfName}</span>}
           {analysis && (
-            <span style={{ fontSize: 12, color: "#888" }}>
+            <span style={{ fontSize: 12, color: "var(--text-faint)" }}>
               {t("extraction")} {analysis.extraction_source === "llm" ? t("srcAI") : t("srcKeyword")}
             </span>
           )}
@@ -188,34 +188,34 @@ export default function AnalyzePage() {
           <div style={{ ...card, borderLeft: `4px solid ${opinionColor}` }}>
             <strong>{t("opinionTitle")}</strong>
             {verdict === null ? (
-              <p style={{ color: "#888", margin: "8px 0 0", fontSize: 14 }}>{t("opinionUnknown")}</p>
+              <p style={{ color: "var(--text-faint)", margin: "8px 0 0", fontSize: 14 }}>{t("opinionUnknown")}</p>
             ) : (
               <>
                 <div style={{ display: "flex", gap: 28, flexWrap: "wrap", margin: "10px 0" }}>
                   <div>
-                    <div style={{ fontSize: 12, color: "#777" }}>{t("opinionActual")}</div>
+                    <div style={{ fontSize: 12, color: "var(--text-muted)" }}>{t("opinionActual")}</div>
                     <strong>{verdict ? t("convicted") : t("acquitted")}</strong>
                   </div>
                   <div>
-                    <div style={{ fontSize: 12, color: "#777" }}>{t("opinionModel")}</div>
+                    <div style={{ fontSize: 12, color: "var(--text-muted)" }}>{t("opinionModel")}</div>
                     <strong>
                       {modelConvicts ? t("convicted") : t("acquitted")} (
                       {Math.round(analysis.prediction.probability * 100)}%)
                     </strong>
                   </div>
                 </div>
-                <p style={{ fontWeight: 700, color: agree ? "#0a7d28" : "#b8860b", margin: "4px 0" }}>
+                <p style={{ fontWeight: 700, color: agree ? "var(--role-defensa)" : "var(--gold)", margin: "4px 0" }}>
                   {agree ? t("opinionAgree") : t("opinionDisagree")}
                 </p>
 
-                <div style={{ marginTop: 6, paddingTop: 10, borderTop: "1px solid #eef0f4" }}>
-                  <div style={{ fontSize: 13, fontWeight: 700, color: "#444", marginBottom: 4 }}>
+                <div style={{ marginTop: 6, paddingTop: 10, borderTop: "1px solid var(--surface-2)" }}>
+                  <div style={{ fontSize: 13, fontWeight: 700, color: "var(--text)", marginBottom: 4 }}>
                     {t("opinionWhyTitle")}
                   </div>
-                  <p style={{ margin: "0 0 8px", fontSize: 14, color: "#444" }}>{reasonSummary}</p>
+                  <p style={{ margin: "0 0 8px", fontSize: 14, color: "var(--text)" }}>{reasonSummary}</p>
                   {drivers.length > 0 ? (
                     <>
-                      <div style={{ fontSize: 12, color: "#777", marginBottom: 4 }}>
+                      <div style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 4 }}>
                         {modelConvicts ? t("reasonDriversConvict") : t("reasonDriversAcquit")}
                       </div>
                       <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
@@ -224,10 +224,10 @@ export default function AnalyzePage() {
                           return (
                             <span
                               key={d.key}
-                              style={{ fontSize: 12, background: "#f3f5fa", padding: "3px 8px", borderRadius: 6 }}
+                              style={{ fontSize: 12, background: "var(--surface-2)", padding: "3px 8px", borderRadius: 6 }}
                             >
                               {labelFor(d.key)}{" "}
-                              <strong style={{ color: pp >= 0 ? "#c0341d" : "#0a7d28" }}>
+                              <strong style={{ color: pp >= 0 ? "var(--role-fiscal)" : "var(--role-defensa)" }}>
                                 {pp > 0 ? "+" : ""}
                                 {pp}%
                               </strong>
@@ -237,21 +237,21 @@ export default function AnalyzePage() {
                       </div>
                     </>
                   ) : (
-                    <p style={{ margin: 0, fontSize: 13, color: "#888" }}>{t("reasonBaseRate")}</p>
+                    <p style={{ margin: 0, fontSize: 13, color: "var(--text-faint)" }}>{t("reasonBaseRate")}</p>
                   )}
                   {opposers.length > 0 && (
                     <div style={{ marginTop: 8 }}>
-                      <div style={{ fontSize: 12, color: "#777", marginBottom: 4 }}>{t("reasonOpposing")}</div>
+                      <div style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 4 }}>{t("reasonOpposing")}</div>
                       <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
                         {opposers.map((d) => {
                           const pp = Math.round(d.delta * 100);
                           return (
                             <span
                               key={d.key}
-                              style={{ fontSize: 12, background: "#f7f7f9", padding: "3px 8px", borderRadius: 6 }}
+                              style={{ fontSize: 12, background: "var(--surface-2)", padding: "3px 8px", borderRadius: 6 }}
                             >
                               {labelFor(d.key)}{" "}
-                              <strong style={{ color: pp >= 0 ? "#c0341d" : "#0a7d28" }}>
+                              <strong style={{ color: pp >= 0 ? "var(--role-fiscal)" : "var(--role-defensa)" }}>
                                 {pp > 0 ? "+" : ""}
                                 {pp}%
                               </strong>
@@ -264,7 +264,7 @@ export default function AnalyzePage() {
                 </div>
               </>
             )}
-            <p style={{ fontSize: 12, color: "#999", margin: "6px 0 0" }}>{t("opinionNote")}</p>
+            <p style={{ fontSize: 12, color: "var(--text-faint)", margin: "6px 0 0" }}>{t("opinionNote")}</p>
           </div>
 
           <div className="cl-grid">
@@ -275,14 +275,14 @@ export default function AnalyzePage() {
             <div style={card}>
               <strong>{t("analyzeInfluential")}</strong>
               <div style={{ marginTop: 10, display: "grid", gap: 6 }}>
-                {influences.length === 0 && <p style={{ color: "#888", fontSize: 14 }}>{t("analyzeNone")}</p>}
+                {influences.length === 0 && <p style={{ color: "var(--text-faint)", fontSize: 14 }}>{t("analyzeNone")}</p>}
                 {influences.map((inf, i) => {
                   const pp = Math.round(inf.delta * 100);
                   return (
                     <div key={inf.key} style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 14 }}>
-                      <span style={{ width: 20, color: "#999" }}>{i + 1}.</span>
+                      <span style={{ width: 20, color: "var(--text-faint)" }}>{i + 1}.</span>
                       <span style={{ flex: 1 }}>{labelFor(inf.key)}</span>
-                      <span style={{ fontWeight: 700, color: pp >= 0 ? "#c0341d" : "#0a7d28" }}>
+                      <span style={{ fontWeight: 700, color: pp >= 0 ? "var(--role-fiscal)" : "var(--role-defensa)" }}>
                         {pp > 0 ? "+" : ""}
                         {pp}%
                       </span>
@@ -300,9 +300,9 @@ export default function AnalyzePage() {
             <div style={card}>
               <strong>{t("analyzeDetected")}</strong>
               <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginTop: 10 }}>
-                {detected.length === 0 && <span style={{ color: "#888", fontSize: 14 }}>{t("analyzeNone")}</span>}
+                {detected.length === 0 && <span style={{ color: "var(--text-faint)", fontSize: 14 }}>{t("analyzeNone")}</span>}
                 {detected.map((k) => (
-                  <span key={k} style={{ fontSize: 12, background: "#eef1f8", color: "#3050b0", padding: "3px 8px", borderRadius: 6 }}>
+                  <span key={k} style={{ fontSize: 12, background: "var(--surface-accent)", color: "var(--accent)", padding: "3px 8px", borderRadius: 6 }}>
                     {labelFor(k)}
                   </span>
                 ))}

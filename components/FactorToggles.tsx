@@ -34,7 +34,7 @@ function Group({
   const { lang, t } = useI18n();
   return (
     <div>
-      <div style={{ fontSize: 12, textTransform: "uppercase", letterSpacing: 0.5, color: "#888", marginBottom: 6 }}>
+      <div style={{ fontSize: 12, textTransform: "uppercase", letterSpacing: 0.5, color: "var(--text-faint)", marginBottom: 6 }}>
         {title}
       </div>
       <div style={{ display: "grid", gap: 6 }}>
@@ -51,14 +51,14 @@ function Group({
               style={{
                 display: "flex", alignItems: "center", gap: 10, padding: "8px 10px",
                 borderRadius: 8,
-                border: `1px solid ${changed ? "#f0a500" : "#e2e4ea"}`,
-                background: changed ? "#fff8e6" : "#fff",
+                border: `1px solid ${changed ? "var(--gold)" : "var(--border)"}`,
+                background: changed ? "var(--warn-bg)" : "var(--surface)",
                 cursor: "pointer", textAlign: "left",
               }}
             >
               <Switch on={on} />
               <span style={{ flex: 1, fontSize: 14 }}>{label}</span>
-              {changed && <span style={{ fontSize: 11, color: "#b8860b" }}>{t("modified")}</span>}
+              {changed && <span style={{ fontSize: 11, color: "var(--gold)" }}>{t("modified")}</span>}
             </button>
           );
         })}
@@ -71,14 +71,14 @@ function Switch({ on }: { on: boolean }) {
   return (
     <span
       style={{
-        width: 34, height: 20, borderRadius: 10, background: on ? "#3050b0" : "#c7ccd6",
+        width: 34, height: 20, borderRadius: 10, background: on ? "var(--accent)" : "var(--border-input)",
         position: "relative", transition: "background 0.15s", flexShrink: 0,
       }}
     >
       <span
         style={{
           position: "absolute", top: 2, left: on ? 16 : 2, width: 16, height: 16,
-          borderRadius: "50%", background: "#fff", transition: "left 0.15s",
+          borderRadius: "50%", background: "var(--surface)", transition: "left 0.15s",
         }}
       />
     </span>

@@ -21,7 +21,7 @@ export default function EvaluationPanel({
   }, [open, data]);
 
   return (
-    <div style={{ marginTop: 24, border: "1px solid #e2e4ea", borderRadius: 10, background: "#fff" }}>
+    <div style={{ marginTop: 24, border: "1px solid var(--border)", borderRadius: 10, background: "var(--surface)" }}>
       <button
         type="button"
         onClick={() => setOpen((o) => !o)}
@@ -31,11 +31,11 @@ export default function EvaluationPanel({
       </button>
       {open && (
         <div style={{ padding: "0 14px 14px" }}>
-          {err && <p style={{ color: "crimson" }}>{err}</p>}
-          {!data && !err && <p style={{ color: "#888" }}>{t("evalLoading")}</p>}
+          {err && <p style={{ color: "var(--danger)" }}>{err}</p>}
+          {!data && !err && <p style={{ color: "var(--text-faint)" }}>{t("evalLoading")}</p>}
           {data && (
             <>
-              <p style={{ fontSize: 13, color: "#555" }}>
+              <p style={{ fontSize: 13, color: "var(--text-muted)" }}>
                 {t("evalIntro", {
                   mae: data.mean_abs_error,
                   acc: String(data.training_metrics.train_accuracy),
@@ -43,7 +43,7 @@ export default function EvaluationPanel({
                 })}
               </p>
               {data.training_metrics.test_accuracy !== undefined && (
-                <p style={{ fontSize: 13, color: "#14161c", fontWeight: 600 }}>
+                <p style={{ fontSize: 13, color: "var(--text)", fontWeight: 600 }}>
                   {t("evalHoldout", {
                     n: String(data.training_metrics.n_test ?? ""),
                     acc: String(data.training_metrics.test_accuracy),
@@ -55,7 +55,7 @@ export default function EvaluationPanel({
               <div className="cl-scroll-x">
                 <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13, minWidth: 360 }}>
                   <thead>
-                    <tr style={{ textAlign: "left", color: "#666" }}>
+                    <tr style={{ textAlign: "left", color: "var(--text-muted)" }}>
                       <th style={{ padding: "4px 6px" }}>{t("colFactor")}</th>
                       <th style={{ padding: "4px 6px" }}>{t("colReal")}</th>
                       <th style={{ padding: "4px 6px" }}>{t("colLearned")}</th>
@@ -64,11 +64,11 @@ export default function EvaluationPanel({
                   </thead>
                   <tbody>
                     {data.weights.map((w) => (
-                      <tr key={w.key} style={{ borderTop: "1px solid #eee" }}>
+                      <tr key={w.key} style={{ borderTop: "1px solid var(--surface-2)" }}>
                         <td style={{ padding: "4px 6px" }}>{labelFor(w.key)}</td>
                         <td style={{ padding: "4px 6px" }}>{w.true_weight}</td>
                         <td style={{ padding: "4px 6px" }}>{w.learned_weight}</td>
-                        <td style={{ padding: "4px 6px", color: w.abs_error > 0.5 ? "#c0341d" : "#0a7d28" }}>
+                        <td style={{ padding: "4px 6px", color: w.abs_error > 0.5 ? "var(--role-fiscal)" : "var(--role-defensa)" }}>
                           {w.abs_error}
                         </td>
                       </tr>

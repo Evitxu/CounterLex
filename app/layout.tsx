@@ -13,8 +13,17 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="es">
-      <body style={{ fontFamily: "system-ui, sans-serif", margin: 0, background: "#f6f7f9", color: "#14161c" }}>
+    <html lang="es" suppressHydrationWarning>
+      <head>
+        {/* Apply the saved/preferred theme before paint (no flash, no hydration mismatch). */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html:
+              "(function(){try{var t=localStorage.getItem('counterlex_theme');if(t!=='light'&&t!=='dark'){t=(window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches)?'dark':'light';}document.documentElement.setAttribute('data-theme',t);}catch(e){}})();",
+          }}
+        />
+      </head>
+      <body style={{ fontFamily: "system-ui, sans-serif", margin: 0, background: "var(--bg)", color: "var(--text)" }}>
         <LanguageProvider>
           <BusyProvider>
             <SiteHeader />
@@ -25,10 +34,10 @@ export default function RootLayout({ children }: { children: ReactNode }) {
             <footer
               style={{
                 textAlign: "center",
-                color: "#9aa0ad",
+                color: "var(--text-faint)",
                 fontSize: 12,
                 padding: "20px",
-                borderTop: "1px solid #e2e4ea",
+                borderTop: "1px solid var(--border)",
                 marginTop: 8,
               }}
             >

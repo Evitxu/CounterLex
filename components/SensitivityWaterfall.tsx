@@ -41,7 +41,7 @@ export default function SensitivityWaterfall({
           const removed = s.key !== null && !scenario[s.key];
           return (
             <div key={i} className="cl-wf-row">
-              <span style={{ width: 150, fontSize: 13, color: s.key === null ? "#14161c" : "#444", fontWeight: s.key === null ? 700 : 400 }}>
+              <span style={{ width: 150, fontSize: 13, color: s.key === null ? "var(--text)" : "var(--text)", fontWeight: s.key === null ? 700 : 400 }}>
                 {s.key !== null && (removed ? "− " : "+ ")}
                 {label}
               </span>
@@ -49,7 +49,7 @@ export default function SensitivityWaterfall({
                 <div className="cl-wf-bar-fill" style={{ width: `${pct}%`, background: color(s.prob) }} />
               </div>
               <span style={{ width: 44, textAlign: "right", fontWeight: 700, color: color(s.prob) }}>{pct}%</span>
-              <span style={{ width: 52, textAlign: "right", fontSize: 12, color: dpp < 0 ? "#0a7d28" : dpp > 0 ? "#c0341d" : "#999" }}>
+              <span style={{ width: 52, textAlign: "right", fontSize: 12, color: dpp < 0 ? "var(--role-defensa)" : dpp > 0 ? "var(--role-fiscal)" : "var(--text-faint)" }}>
                 {s.key === null ? "" : `${dpp > 0 ? "+" : ""}${dpp} pp`}
               </span>
             </div>

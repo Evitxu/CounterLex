@@ -12,8 +12,8 @@ const EMAIL_RE = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
 type Field = keyof typeof LIMITS;
 
 const card: React.CSSProperties = {
-  background: "#fff",
-  border: "1px solid #e2e4ea",
+  background: "var(--surface)",
+  border: "1px solid var(--border)",
   borderRadius: 10,
   padding: 20,
   marginBottom: 16,
@@ -23,7 +23,7 @@ const card: React.CSSProperties = {
 const inputBase: React.CSSProperties = {
   width: "100%",
   padding: 10,
-  border: "1px solid #d2d7e0",
+  border: "1px solid var(--border-input)",
   borderRadius: 8,
   fontSize: 14,
   fontFamily: "inherit",
@@ -118,7 +118,7 @@ export default function ContactPage() {
     return (
       <div style={{ marginBottom: 16 }}>
         <label style={{ display: "block", fontSize: 13, fontWeight: 600, marginBottom: 6 }}>
-          {labels[f]} <span style={{ color: "crimson" }}>*</span>
+          {labels[f]} <span style={{ color: "var(--danger)" }}>*</span>
         </label>
         {textarea ? (
           <textarea
@@ -142,8 +142,8 @@ export default function ContactPage() {
           />
         )}
         <div style={{ display: "flex", justifyContent: "space-between", marginTop: 4 }}>
-          <span style={{ fontSize: 12, color: "crimson" }}>{err ?? ""}</span>
-          <span style={{ fontSize: 12, color: "#999" }}>
+          <span style={{ fontSize: 12, color: "var(--danger)" }}>{err ?? ""}</span>
+          <span style={{ fontSize: 12, color: "var(--text-faint)" }}>
             {t("contactCharsLeft", { n: left })}
           </span>
         </div>
@@ -154,7 +154,7 @@ export default function ContactPage() {
   return (
     <section>
       <h1 style={{ marginTop: 0 }}>✉️ {t("contactTitle")}</h1>
-      <p style={{ color: "#555", maxWidth: 640 }}>{t("contactIntro")}</p>
+      <p style={{ color: "var(--text-muted)", maxWidth: 640 }}>{t("contactIntro")}</p>
 
       <form onSubmit={onSubmit} style={card} noValidate>
         {renderField("name")}
@@ -167,12 +167,12 @@ export default function ContactPage() {
         </button>
 
         {done && (
-          <p style={{ color: "#1a7f37", marginTop: 14, marginBottom: 0 }}>
+          <p style={{ color: "var(--good)", marginTop: 14, marginBottom: 0 }}>
             {done.emailSent ? t("contactOk") : t("contactOkStored")}
           </p>
         )}
         {serverError && (
-          <p style={{ color: "crimson", marginTop: 14, marginBottom: 0 }}>
+          <p style={{ color: "var(--danger)", marginTop: 14, marginBottom: 0 }}>
             {t("contactError")} {serverError}
           </p>
         )}

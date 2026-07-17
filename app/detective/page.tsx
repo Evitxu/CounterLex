@@ -9,8 +9,8 @@ import { CASES } from "@/lib/cases";
 import type { Factor } from "@/lib/types";
 
 const card: React.CSSProperties = {
-  background: "#fff",
-  border: "1px solid #e2e4ea",
+  background: "var(--surface)",
+  border: "1px solid var(--border)",
   borderRadius: 10,
   padding: 16,
   marginBottom: 16,
@@ -84,15 +84,15 @@ export default function DetectivePage() {
   return (
     <section>
       <h1 style={{ marginTop: 0 }}>🕵️ {t("detTitle")}</h1>
-      <p style={{ color: "#555", maxWidth: 760 }}>{t("detIntro")}</p>
-      {err && <p style={{ color: "crimson" }}>{err} — {t("backendError")}</p>}
+      <p style={{ color: "var(--text-muted)", maxWidth: 760 }}>{t("detIntro")}</p>
+      {err && <p style={{ color: "var(--danger)" }}>{err} — {t("backendError")}</p>}
 
       {/* Scene */}
       <div style={{ ...card, display: "flex", gap: 16, alignItems: "center" }}>
         <div style={{ fontSize: 44, lineHeight: 1 }}>{scene.emoji}</div>
         <div>
           <div style={{ fontWeight: 700, fontSize: 18 }}>{lang === "en" ? scene.title_en : scene.title_es}</div>
-          <div style={{ color: "#555", fontSize: 14 }}>{lang === "en" ? scene.intro_en : scene.intro_es}</div>
+          <div style={{ color: "var(--text-muted)", fontSize: 14 }}>{lang === "en" ? scene.intro_en : scene.intro_es}</div>
         </div>
       </div>
 
@@ -101,10 +101,10 @@ export default function DetectivePage() {
         <div
           style={{
             ...card,
-            borderLeft: `4px solid ${correct ? "#0a7d28" : "#c0341d"}`,
+            borderLeft: `4px solid ${correct ? "var(--role-defensa)" : "var(--role-fiscal)"}`,
           }}
         >
-          <strong style={{ color: correct ? "#0a7d28" : "#c0341d" }}>
+          <strong style={{ color: correct ? "var(--role-defensa)" : "var(--role-fiscal)" }}>
             {correct
               ? t("detCorrect", { name: nameOf(culprit), p: Math.round(scores[culprit.id] * 100) })
               : t("detWrong", {
@@ -114,11 +114,11 @@ export default function DetectivePage() {
                 })}
           </strong>
           {decisive && (
-            <p style={{ margin: "8px 0 0", fontSize: 14, color: "#333" }}>
+            <p style={{ margin: "8px 0 0", fontSize: 14, color: "var(--text)" }}>
               {t("detDecisive", { name: nameOf(culprit), factor: labelFor(decisive.key), a: decisive.a, b: decisive.b })}
             </p>
           )}
-          <p style={{ margin: "6px 0 0", fontSize: 12, color: "#999" }}>{t("detNote")}</p>
+          <p style={{ margin: "6px 0 0", fontSize: 12, color: "var(--text-faint)" }}>{t("detNote")}</p>
           <button className="btn btn-secondary" onClick={newCase} style={{ marginTop: 10 }}>
             🔄 {t("detNewCase")}
           </button>
@@ -139,10 +139,10 @@ export default function DetectivePage() {
             <div
               key={s.id}
               style={{
-                border: `2px solid ${isCulprit ? "#0a7d28" : isAccused ? "#c0341d" : "#e2e4ea"}`,
+                border: `2px solid ${isCulprit ? "var(--role-defensa)" : isAccused ? "var(--role-fiscal)" : "var(--border)"}`,
                 borderRadius: 10,
                 padding: 12,
-                background: "#fff",
+                background: "var(--surface)",
                 display: "flex",
                 flexDirection: "column",
                 gap: 8,
@@ -154,7 +154,7 @@ export default function DetectivePage() {
                 {isCulprit && <span style={{ marginLeft: "auto" }}>🎯</span>}
               </div>
 
-              <div style={{ fontSize: 12, color: "#777" }}>{t("detEvidence")}</div>
+              <div style={{ fontSize: 12, color: "var(--text-muted)" }}>{t("detEvidence")}</div>
               <div style={{ display: "flex", flexWrap: "wrap", gap: 4 }}>
                 {Object.keys(s.factors)
                   .filter((k) => s.factors[k])
@@ -167,8 +167,8 @@ export default function DetectivePage() {
                           fontSize: 11,
                           padding: "2px 6px",
                           borderRadius: 6,
-                          background: incrim ? "#fdecea" : "#e9f7ef",
-                          color: incrim ? "#c0341d" : "#0a7d28",
+                          background: incrim ? "var(--danger-bg)" : "var(--good-bg)",
+                          color: incrim ? "var(--role-fiscal)" : "var(--role-defensa)",
                         }}
                       >
                         {labelFor(k)}
@@ -179,10 +179,10 @@ export default function DetectivePage() {
 
               {revealed ? (
                 <div style={{ marginTop: 4 }}>
-                  <div style={{ height: 10, background: "#eceef3", borderRadius: 5, overflow: "hidden" }}>
+                  <div style={{ height: 10, background: "var(--surface-2)", borderRadius: 5, overflow: "hidden" }}>
                     <div style={{ width: `${Math.round(p * 100)}%`, height: "100%", background: probColor(p) }} />
                   </div>
-                  <div style={{ fontSize: 12, color: "#666", marginTop: 3 }}>
+                  <div style={{ fontSize: 12, color: "var(--text-muted)", marginTop: 3 }}>
                     {Math.round(p * 100)}% {t("detProb")}
                   </div>
                 </div>

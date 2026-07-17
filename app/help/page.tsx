@@ -7,8 +7,8 @@ import { useBusy } from "@/lib/busy";
 import type { Factor } from "@/lib/types";
 
 const card: React.CSSProperties = {
-  background: "#fff",
-  border: "1px solid #e2e4ea",
+  background: "var(--surface)",
+  border: "1px solid var(--border)",
   borderRadius: 10,
   padding: "16px 18px",
   marginBottom: 16,
@@ -111,7 +111,7 @@ const CONTENT: Record<"es" | "en", Content> = {
   },
 };
 
-const sectionH: React.CSSProperties = { fontSize: 16, color: "#3050b0", margin: "0 0 10px" };
+const sectionH: React.CSSProperties = { fontSize: 16, color: "var(--accent)", margin: "0 0 10px" };
 
 export default function HelpPage() {
   const { t, lang } = useI18n();
@@ -136,7 +136,7 @@ export default function HelpPage() {
         {list.map((f) => (
           <li key={f.key} style={{ marginBottom: 6, fontSize: 14 }}>
             <strong>{lang === "en" ? f.label_en : f.label_es}</strong>
-            {f.description_es ? <> — <span style={{ color: "#555" }}>{f.description_es}</span></> : null}
+            {f.description_es ? <> — <span style={{ color: "var(--text-muted)" }}>{f.description_es}</span></> : null}
           </li>
         ))}
       </ul>
@@ -146,14 +146,14 @@ export default function HelpPage() {
   return (
     <section>
       <h1 style={{ marginTop: 0 }}>❓ {c.title}</h1>
-      <p style={{ color: "#555", maxWidth: 820 }}>{c.intro}</p>
+      <p style={{ color: "var(--text-muted)", maxWidth: 820 }}>{c.intro}</p>
       <p
         style={{
           maxWidth: 820,
           fontSize: 13,
-          color: "#8a6d00",
-          background: "#fff8e1",
-          border: "1px solid #ffe2a8",
+          color: "var(--warn-text)",
+          background: "var(--warn-bg)",
+          border: "1px solid var(--warn-border)",
           borderRadius: 8,
           padding: "8px 12px",
         }}
@@ -168,7 +168,7 @@ export default function HelpPage() {
             <div key={m.name} style={{ display: "flex", gap: 10 }}>
               <span style={{ fontSize: 18, width: 24, textAlign: "center" }}>{m.icon}</span>
               <div style={{ fontSize: 14 }}>
-                <strong>{m.name}</strong> — <span style={{ color: "#555" }}>{m.desc}</span>
+                <strong>{m.name}</strong> — <span style={{ color: "var(--text-muted)" }}>{m.desc}</span>
               </div>
             </div>
           ))}
@@ -177,17 +177,17 @@ export default function HelpPage() {
 
       <div style={card}>
         <h2 style={sectionH}>{c.factorsTitle}</h2>
-        <p style={{ fontSize: 14, color: "#555", marginTop: 0 }}>{c.factorsIntro}</p>
+        <p style={{ fontSize: 14, color: "var(--text-muted)", marginTop: 0 }}>{c.factorsIntro}</p>
         {factors.length === 0 ? (
-          <p style={{ color: "#888", fontSize: 14 }}>…</p>
+          <p style={{ color: "var(--text-faint)", fontSize: 14 }}>…</p>
         ) : (
           <div style={{ display: "grid", gap: 12 }}>
             <div>
-              <div style={{ fontSize: 13, fontWeight: 600, color: "#b3261e" }}>{c.incriminating}</div>
+              <div style={{ fontSize: 13, fontWeight: 600, color: "var(--role-fiscal)" }}>{c.incriminating}</div>
               {factorList(incrim)}
             </div>
             <div>
-              <div style={{ fontSize: 13, fontWeight: 600, color: "#1a7f37" }}>{c.exculpatory}</div>
+              <div style={{ fontSize: 13, fontWeight: 600, color: "var(--good)" }}>{c.exculpatory}</div>
               {factorList(excul)}
             </div>
           </div>
@@ -198,7 +198,7 @@ export default function HelpPage() {
         <h2 style={sectionH}>{c.methodTitle}</h2>
         <ul style={{ margin: 0, paddingLeft: 18 }}>
           {c.method.map((m, i) => (
-            <li key={i} style={{ marginBottom: 6, fontSize: 14, color: "#333" }}>{m}</li>
+            <li key={i} style={{ marginBottom: 6, fontSize: 14, color: "var(--text)" }}>{m}</li>
           ))}
         </ul>
       </div>
@@ -207,7 +207,7 @@ export default function HelpPage() {
         <h2 style={sectionH}>{c.limitsTitle}</h2>
         <ul style={{ margin: 0, paddingLeft: 18 }}>
           {c.limits.map((m, i) => (
-            <li key={i} style={{ marginBottom: 6, fontSize: 14, color: "#333" }}>{m}</li>
+            <li key={i} style={{ marginBottom: 6, fontSize: 14, color: "var(--text)" }}>{m}</li>
           ))}
         </ul>
       </div>

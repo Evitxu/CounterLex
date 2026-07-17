@@ -2,6 +2,7 @@
 
 import { useI18n } from "@/lib/i18n";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
+import ThemeToggle from "@/components/ThemeToggle";
 
 export default function SiteHeader() {
   const { t } = useI18n();
@@ -9,7 +10,7 @@ export default function SiteHeader() {
     <header
       style={{
         padding: "14px 20px",
-        background: "#14161c",
+        background: "var(--header-bg)",
         color: "#fff",
         display: "flex",
         alignItems: "center",
@@ -21,7 +22,10 @@ export default function SiteHeader() {
         <div style={{ fontWeight: 700, fontSize: 18 }}>CounterLex</div>
         <div style={{ fontSize: 13, color: "#aeb4c2" }}>{t("subtitle")}</div>
       </div>
-      <LanguageSwitcher />
+      <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+        <ThemeToggle />
+        <LanguageSwitcher />
+      </div>
     </header>
   );
 }

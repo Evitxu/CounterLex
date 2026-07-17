@@ -20,8 +20,8 @@ import SensitivityWaterfall from "@/components/SensitivityWaterfall";
 import { reconstructModel } from "@/lib/model";
 
 const card: React.CSSProperties = {
-  background: "#fff",
-  border: "1px solid #e2e4ea",
+  background: "var(--surface)",
+  border: "1px solid var(--border)",
   borderRadius: 10,
   padding: 16,
   marginBottom: 16,
@@ -226,14 +226,14 @@ export default function Home() {
   return (
     <section>
       <h1 style={{ marginTop: 0 }}>{t("h1")}</h1>
-      <p style={{ color: "#555", maxWidth: 760 }}>{t("intro")}</p>
-      {err && <p style={{ color: "crimson" }}>{err} — {t("backendError")}</p>}
+      <p style={{ color: "var(--text-muted)", maxWidth: 760 }}>{t("intro")}</p>
+      {err && <p style={{ color: "var(--danger)" }}>{err} — {t("backendError")}</p>}
 
       <div className="cl-grid">
         {/* ---- Left: input + factors ---- */}
         <div>
           <div style={card}>
-            <label style={{ fontSize: 13, color: "#444", fontWeight: 600 }}>{t("caseLabel")}</label>
+            <label style={{ fontSize: 13, color: "var(--text)", fontWeight: 600 }}>{t("caseLabel")}</label>
             <textarea
               value={caseText}
               onChange={(e) => setCaseText(e.target.value)}
@@ -250,7 +250,7 @@ export default function Home() {
                 {t("example")}
               </button>
               {source && (
-                <span style={{ fontSize: 12, color: "#888" }}>
+                <span style={{ fontSize: 12, color: "var(--text-faint)" }}>
                   {t("extraction")} {source === "llm" ? t("srcAI") : t("srcKeyword")}
                 </span>
               )}
@@ -270,7 +270,7 @@ export default function Home() {
               </div>
             </div>
             {catalog.length === 0 ? (
-              <p style={{ color: "#888" }}>{t("loadingFactors")}</p>
+              <p style={{ color: "var(--text-faint)" }}>{t("loadingFactors")}</p>
             ) : (
               <FactorToggles catalog={catalog} values={scenarioFactors} baseline={baseFactors} onToggle={toggle} />
             )}
@@ -295,7 +295,7 @@ export default function Home() {
 
           <div style={card}>
             <strong>{t("cfTitle")}</strong>
-            <p style={{ margin: "8px 0 0", color: "#333", lineHeight: 1.5 }}>
+            <p style={{ margin: "8px 0 0", color: "var(--text)", lineHeight: 1.5 }}>
               {narrative || (changedCount === 0 ? t("cfPrompt") : "")}
             </p>
           </div>
@@ -329,7 +329,7 @@ export default function Home() {
 
       <EvaluationPanel labelFor={labelFor} />
 
-      <p style={{ color: "#999", fontSize: 12, marginTop: 16 }}>{t("disclaimer")}</p>
+      <p style={{ color: "var(--text-faint)", fontSize: 12, marginTop: 16 }}>{t("disclaimer")}</p>
     </section>
   );
 }
