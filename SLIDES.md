@@ -34,6 +34,7 @@ App: counterlex.up.railway.app
 - Un caso = vector de **factores jurídicos** (prueba forense, confesión, coartada, prueba nula…): **11 factores**.
 - Modelo: **regresión logística** → los coeficientes *son* el efecto (log-odds) de cada factor → transparente por construcción.
 - Contrafactual = intervención limpia: fijar un factor y recomputar el predictor lineal.
+- **Ejemplo (log-odds):** intercepto −0,4 → 40 %; con *confesión* (β = 2,2): −0,4 + 2,2 = 1,8 → **86 %**. `do(confesión = 0)` deshace ese salto → efecto aislado.
 
 ---
 

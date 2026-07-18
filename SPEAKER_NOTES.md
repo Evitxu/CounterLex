@@ -27,8 +27,21 @@ conocer la "verdad" (los pesos con los que se generó el corpus), medimos la
 
 ## 4 · Enfoque metodológico
 Justifica por qué logística y no una red neuronal: no es (solo) por rendimiento,
-es porque el coeficiente ES la explicación y hace del `do()` una operación exacta
-bajo los supuestos del modelo.
+es porque **el coeficiente ES la explicación** y hace del `do()` una operación
+exacta bajo los supuestos del modelo.
+
+- **Log-odds** = la escala en la que los efectos se suman de forma constante:
+  `log-odds = β₀ + Σ βᵢ·xᵢ`; luego la función logística lo convierte en
+  probabilidad. Cada coeficiente = cuánto suma (o resta) ese factor.
+- **Ejemplo numérico** (pesos reales del corpus): intercepto β₀ = −0,4 →
+  σ(−0,4) ≈ **40 %**. Añado *confesión* (β = 2,2): −0,4 + 2,2 = 1,8 →
+  σ(1,8) ≈ **86 %**. La confesión «suma 2,2 al log-odds» = pasar del 40 % al 86 %.
+- **`do(factor = x)`** (operador *do* de Pearl) = **intervenir**: fijar el factor y
+  recomputar, no solo observar. `do(confesión = 0)` deshace ese salto y muestra el
+  efecto **aislado** → eso es el contrafactual.
+- Si preguntan por causalidad: es un contrafactual **bajo los supuestos del
+  modelo** (factores = variables relevantes, sin confusión no modelada), no una
+  garantía causal del mundo real.
 
 ## 5 · Arquitectura y funcionalidades
 Destaca la separación de responsabilidades (rutas → un bus; commands mutan estado,
