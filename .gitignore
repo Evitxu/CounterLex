@@ -13,3 +13,8 @@
 # General
 .DS_Store
 *.log
+
+# Working presentation material — kept local only
+SLIDES.md
+SPEAKER_NOTES.md
+VIDEO_SCRIPT.md
