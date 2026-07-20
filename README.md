@@ -36,7 +36,7 @@ workflow de **CI** (GitHub Actions) que ejecuta sus tests en cada push.
 |---------|--------|
 | 🌐 **Despliegue (app en funcionamiento)** | **App:** <https://counterlex.up.railway.app> · **API + docs:** <https://counterlex-api.up.railway.app/docs> |
 | 💻 **Repositorio GitHub** | <https://github.com/Evitxu/CounterLex> |
-| 🖼️ **Slides de la presentación** | [Google Slides](https://docs.google.com/presentation/d/1y_Wf592ZYtMp7NpaRFE66u-sa47uLq_aAbck2_OresY/edit?usp=sharing) |
+| 🖼️ **Slides de la presentación** | [Google Slides](https://docs.google.com/presentation/d/1rZt5vkk-vgozn9bCRd5-nzjj-kwqrUOW1ssbAOxdDio/edit?usp=sharing) |
 | 🎥 **Vídeo de explicación** | [YouTube](https://youtu.be/41TUDV--R1A) |
 | 🔑 **Usuario y contraseña de prueba** | **No aplica** — la aplicación es de acceso libre, no tiene login. |
 | 🧪 **Material de prueba** | Sentencias de ejemplo en [`sentencias-test/`](sentencias-test/) para el módulo *Analizar sentencia* (ver §7). |
